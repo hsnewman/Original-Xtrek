@@ -1,0 +1,39 @@
+This is an updated version of an older xtrek that I released some time ago.
+There are at least four versions of xtrek that I know about, all with
+different version labeling.  To attempt to clear things up just a little
+bit, this will be known as xtrek version D3.1.
+
+In addition to many many bug fixes, which are too numerous to write down
+(actually, I can't remember them all...some were quite a while ago!),
+there are new features added.
+
+Some of the added features over the last released version:
+    - X features:
+	- Code to allow resizing the windows.  This will allow xtrek to
+	  be played on something with a screen the size of a PC.
+	- Bug fixes for the input() routine.  If you use this routine
+	  in other multi-user applications, be sure to take a look
+	  at the changes here.
+	- Attempt to be ICCCM compliant.
+		- Window managers that the game was tested under include:
+			olwm, twm, mwm
+
+    - Game features:
+	- Tractor beams are implemented
+	- Copiloting is implemented, though not extensively tested.
+	- A "god" ship for the implementor to keep an eye on things.
+	- Many changes to the robots.
+		- Three types:  Easy, Hard, Very Hard
+		- Robots, if friendly & on your team, will aid you.
+		- Robots will protect non-system planets.  (New code, not
+		  extensively tested)
+		- Other changes (don't remember them all)
+	- Player ship modification code has been tuned somewhat to allow
+	  better playability.
+
+
+If you need to make ANY changes to this version to make it run on
+your system, I'd appreciate receiving some email with notes about what
+you needed to change; patches will be smiled upon.
+
+	-Dan A. Dickey		ddickey at cray.com

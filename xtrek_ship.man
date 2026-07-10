@@ -1,0 +1,316 @@
+.\"static char sccsid[] = "@(#)xtrek_ship.man	3.1";
+.TH XTREK_SHIP 6 "08 Mar 1989"
+.SH NAME
+xtrek_ship - Ship customization for xtrek(6)
+.SH SYNOPSIS
+.B
+xtrek.ship:
+[ acdefgmprstvwxACDEFGMPRSTVWX ] ...
+.SH DESCRIPTION
+.IR Xtrek (6)
+is a multi-player game of galactic warfare based on the Star
+Trek universe.
+.PP
+The following describes the customization of ships allowed
+by specifying the
+.B ship
+default in your
+.I \&.Xdefaults
+file.
+Customization is done by decreasing your ship's
+abilities in one area, in order to increase them in another
+area.
+The effect of one Unit of Customization (UoC) is
+described below for each ability.
+.PP
+The
+.B ship
+default specifies your ship customization as a list of
+upper- and lower-case letters.
+Upper-case letters add one
+UoC to the associated abilities, while lower-case letters
+subtract one UoC from the associated abilities.
+.PP
+Starting
+.IR xtrek (6)
+with a ``-n name'' option will force it to use the
+.I name
+default instead of the
+.B ship
+default.
+This can be useful for keeping several ship
+descriptions available, selecting the desired ship when
+starting
+.IR xtrek .
+.PP
+Reasonable limits are made on the modifications allowed.
+One general limitation is that the number of upper-case
+letters cannot exceed the number of lower-case letters.
+Each ability will also have limitations listed.
+.SH ABILITIES
+.PP
+The various ship types start out with differing capabilities.
+Here is a table of the defaults:
+.nf
+
+
+       Ability       Federation     Romulan      Klingon       Orion
+    Army Transport       10            14           10            6
+    Cloaking Cost        30            20           30           30
+  Heat Dissipation     2, 5          6, 3         2, 5         1, 7
+ Engine Efficiency       20            25           20           15
+    Fuel Capacity     10000         20000        10000         7500
+   Fuel Generation       12            10           12           14
+   Maneuverability        2             1            2            4
+    Phaser Size        2500          3125         2500         2000
+    Repair Rate         100           150          100          100
+   Shield Strength      100           125          100          100
+    Torpedo Size        450           900          450          250
+  Torpedo Velocity       12            18           12           18
+    Warp Engines          9             7            9           11
+    Ship Size           100           100          100          100
+
+.fi
+.PP
+Here are the abilities, and their associated letters.
+The effect of subtracting a UoC is listed in parenthesis.
+.TP 5
+.IB "Army Transport" \ a/A
+The default ship can carry a maximum number of armies as listed in
+the table.
+Each UoC increases (decreases) the maximum capacity of the
+ship by 4 armies.
+You cannot decrease this by more than 2 UoC.
+.TP 5
+.IB "Cloaking Cost" \ C
+Cloaking costs start at the base value listed in the table above.
+Each UoC lowers
+(raises) the cost for your ship by 10
+fuel units, within an allowable range of 0-30 fuel units.
+This cost is then multiplied by your current speed and then subtracted
+from your fuel.
+It costs more to be cloaked if you are travelling faster.
+NOTE: There is no 'c' option.
+.TP 5
+.IB "Heat Dissipation" \ d/D
+The table above lists two numbers, the first represents weapon heat
+dissipation and the second engine heat dissipation.
+Each UoC raises (lowers)
+your ship's heat dissipation by 1 heat unit, with a
+minimum heat dissipation of 0 heat units.
+Both values are affected equally for each UoC.
+.TP 5
+.IB "Engine Efficiency" \ e/E
+In regards to engines, you use fuel at the following rate:
+.nf
+
+   amount = warpcost * speed
+   if (shields are up)
+      amount = amount * 2
+   amount = amount + warpcost * number of armies on board
+
+.fi
+Starting with the "Engine Efficiency" value in the table above,
+the resulting warpcost is calculated as follows:
+.nf
+
+   warpcost = ee / (5 + UoC)
+
+.fi
+This translates into the
+following fuel costs (shown for Federation and Klingon ships):
+.nf
+      UoC Allocation    Starting "EE"      Warp Cost
+	   -4               20                20
+	   -3               20                10
+	   -2               20                6
+	   -1               20                5
+	    0               20                4
+	    1               20                3
+	    2               20                2
+	    3               20                2
+	    4               20                2
+	    5               20                2
+	    6               20                1
+
+.fi
+.TP 5
+.IB "Fuel Capacity" \ f/F
+Un-changed ships have fuel capacities as shown in the beginning table.
+Each UoC
+raises (lowers) your ship's capacity by 2,500 fuel units.
+.TP 5
+.IB "Fuel Generation" \ g/G
+Ships generate fuel as listed in the beginning table.
+Each UoC raises
+(lowers) the fuel generation rate by 2, with a
+minimum rate of 0 fuel units.
+.TP 5
+.IB "Maneuverability" \ m/M
+This affects how quickly your ship can change directions
+while moving.
+Each UoC allows your ship to maneuver as well
+as a normal ship traveling one warp factor slower (faster).
+At the minimum setting (-5 UoC), warp 1 behaves like warp 6
+normally does and navagation requires nearly stopping before
+turning.
+The beginning table numbers merely reflect that Federation and
+Klingon ships outmaneuver Romulan ships by a factor of 2:1.
+And Orion ships outmaneuver Romulan ships by a factor of 4:1.
+.TP 5
+.IB "Phaser Size" \ p/P
+Normal phasers
+have 4 times the value listed in the beginning table for a "size".
+Each UoC increases (decreases)
+this by another unit.
+For base Federation and Klingon ships, this results in a size of
+10000 units, for Romulans a size of 12500, and Orions get an 8000.
+The damage inflicted by phasers is
+the square root of the Phaser Size.
+The minimum damage is 0 (you've scuttled your phasers).
+Phaser range, fuel required, and weapons heating
+are proportional to the damage inflicted by the phasers.
+The following chart correlates damage to the number of UoC
+allocated to Phaser Size, for Federation and Klingon ships:
+
+.nf
+
+	Point Blank	UoC Allocation
+	Phaser Damage	  Required
+
+	     0		    -4
+	    50		    -3
+	    70		    -2
+	    86		    -1
+	   100		     0
+	   111		     1
+	   122		     2
+	   132		     3
+	   141		     4
+	   158		     6
+	   173		     8
+	   200		    12
+	   223		    16
+.fi
+.TP 5
+.IB "Repair Rate" \ r/R
+Ships base repair rate is listed in the beginning table.
+Each UoC increases (decreases) this by 50 damage units, with
+a minimum repair rate of 0 damage units.
+.TP 5
+.IB "Shield Strength" \ s/S
+Shield strength of normal ships is listed in the beginning table.
+Each UoC increases (decreases) this by 25 damage units, with
+a minimum strength of 0 (no shields at all--not
+recommended).
+.TP 5
+.IB "Torpedo Size" \ t/T
+Normal photon torpedoes
+have 2 times the value listed in the beginning table for a "size".
+Each UoC increases (decreases)
+this by another unit.
+For base Federation and Klingon ships, this results in a size of
+900 units, for Romulans a size of 1800, and Orions get a 500.
+The damage inflicted by torpedoes
+is the square root of the Torpedo Size.
+The minimum damage is 0 (you've scuttled your torpedoes).
+The fuel required and weapons heating
+are proportional to Torpedo Size.
+The following chart correlates damage to the number of UoC
+allocated to Torpedo Size, for Federation and Klingon ships:
+
+.nf
+
+	Point Blank	UoC Allocation
+	Torpedo Damage	  Required
+
+	      0		     -2
+	     21		     -1
+	     30		      0
+	     36		      1
+	     42		      2
+	     47		      3
+	     51		      4
+	     60		      6
+	     67		      8
+	     79		     12
+	     90		     16
+.fi
+.TP 5
+.IB "Torpedo Velocity" \ v/V
+Normal photon torpedoes travel at a warp factor as listed in the
+beginning table.
+Each UoC
+increases (decreases) the torpedo velocity by 6 warp
+factors, with a minimum torpedo velocity of warp 0 (your
+torpedo launchers simply drop them in space as mines).
+The
+range of torpedoes, fuel required to fire them, and heat generated
+by them are proportional to their velocity and damage they cause.
+.TP 5
+.IB "Warp Engines" \ w/W
+The beginning table lists the maximum warp factor for each ship type.
+Each UoC
+increases (decreases) the maximum by two warp factors, with a
+minimum limit of warp 1.
+.TP 5
+.IB "Ship Size" \ x/X
+The beginning table show how many damage units each type of
+default ship can withstand.
+Each UoC increases (decreases) the
+strength of the ship by 15 damage units, with a minimum Ship
+Size withstanding 25 damage units.
+.SH NOTE
+It may be helpful to some to think of ship customization in
+the following manner.
+You are given a ship hull, and are
+allocated a base number of UoC with which to convert this hull into a
+viable starship.
+The default ship configuration allocates
+these UoC to create a general purpose ship.
+Obviously, some
+systems (eg, Heat Dissipation, Fuel Generation) must have
+some UoC allocated to them, while others are less essential
+(eg, Army Transport).
+.SH EXAMPLES
+.TP 8
+.B
+xtrek.ship: mmmPPP
+This ship has -3 UoC for Maneuverability, and +3 UoC Phaser
+Size.
+.TP 8
+.B
+xtrek.ship: agwCCC
+This ship has -1 UoC each for Army Transport, Fuel Generation,
+and Warp Engines, but with +3 UoC Cloaking Cost,
+he is not an easy target.
+.TP 8
+.B
+xtrek.torper: appppwDGGVTT
+This ship has -1 UoC Army Transport,
+-4 UoC Phaser Size, and -1 UoC Warp Speed.
+But with +1 UoC Heat Dissipation, +2 UoC Fuel Generation, +1 UoC Torpedo
+Velocity and +2 UoC Torpedo Size, they'll keep you dodging photon
+torpedoes.
+.TP 8
+.B
+xtrek.ship: aattvvEEMMPP
+This ship has -2 UoC for Army Transport,
+-2 UoC
+Torpedo Size, and -2 UoC Torpedo
+Velocity.
+However, this ship has +2 UoC
+Engine Efficiency, +2
+UoC Maneuverability, and +2 UoC for Phaser Size.
+It's a good fighter.
+.SH "SEE ALSO"
+xtrek(6)
+.SH DIAGNOSTICS
+If a specified ship customization is invalid, xtrek will
+silently ignore the customization and you'll get the default ship type.
+.SH BUGS
+The customization parameters need to be balanced.
+
+Letters other than those understood are silently ignored.
+
+

@@ -1,0 +1,9 @@
+Things to be done...
+
+-	Fix scoring routines.  They are hopelessly confused.
+	Need a better way to manage scores than listing by name:display.
+-	Upgrade documentation/man pages
+
+If you do any of these things, send patches, files, notes, questions to
+ddickey at cray.com
+/* static char sccsid[] = "@(#)TODO	3.1"; */

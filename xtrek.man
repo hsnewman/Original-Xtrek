@@ -1,0 +1,108 @@
+.\"static char sccsid[] = "@(#)xtrek.man	3.1";
+.TH XTREK 6 "08 Mar 1989"
+.SH NAME
+xtrek \- X based multi-player space shoot 'em up game
+.SH SYNOPSIS
+.B
+xtrek
+[
+\-s
+.BI xtrek-server-machine
+] [
+\-d
+.BI display
+] [
+\-q
+] [
+\-c
+.BI ship-number
+] [
+\-n
+.BI ship-name
+] [
+\-S
+] [
+\-P
+] [
+\-R
+]
+.SH DESCRIPTION
+.I Xtrek
+is a game based on the X window environment.
+It is thoroughly described in xtrek.doc which probably lives
+in /usr/games/lib/xtrek/xtrek.doc.
+.SH OPTIONS
+.TP
+.B \-s
+Use "xtrek-server-machine" as the machine to connect to.
+If not specified,
+.B xtrek
+will first try to use the XTREKSERVER
+environment variable, and failing that will use the name "xtrek-server".
+.TP
+.B \-d
+Create the connection from the server machine to the specified display.
+If not specified,
+.B xtrek
+will use the DISPLAY environment variable.
+The display "unix:0.0" (a default) will not work unless the xtrek daemon
+is running on a node with a display.
+.TP
+.B \-q
+This queries the xtrek-server to find out how many players and robots
+there are.
+If the output is a tty, the results will be printed.
+If not, the return value is encoded using the following values added
+together:
+.in +2
+1000 - Federation players are in the game
+.br
+100 - Romulan players are in the game
+.br
+10 - Klingon players are in the game
+.br
+1 - Orion players are in the game
+.in -2
+.TP
+.B \-c
+Become a copilot of ship "ship-number".
+.TP
+.B \-n
+Use "ship-name" as a name of a ship to search for in your resource
+database.
+The string returned is used to modify your ship characteristics.
+See
+.B
+xtrek_ship (6)
+for more information about ship characteristics.
+.TP
+.B \-S
+List the scores database to stdout.
+This prints all the scores that have been entered in the scores database.
+.TP
+.B \-R
+List the "running" scores to stdout.
+This prints the scores of all the people who have entered the game
+during it's present incarnation.
+.TP
+.B \-P
+List the players who are presently in the game.
+.SH "SEE ALSO"
+.BR xtrek_ship (6)
+.BR xtrekb (6)
+.SH AUTHOR
+.TP
+Chris Guthrie (chris at ic.berkeley.edu)
+.SH CONTRIBUTORS
+.PD 0
+.TP
+Dan Dickey (ddickey at cray.com)
+.TP
+Matt Burdick (burdick%hpda at hplabs.hp.com)
+.TP
+Jeff Schmidt (jas%hpda at hplabs.hp.com)
+.TP
+Hal Peterson (hrp at cray.com)
+.PD
+.SH BUGS
+"Captain, the probability factor approaches 1.0".

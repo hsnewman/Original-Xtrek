@@ -1,0 +1,155 @@
+This explains quickly how to run xtrek on a ultrix,
+Sun 3.20, or HP-UX 5.2 system.  Note that other
+operating systems will probably require fiddling.
+There are notes for various operating systems below.
+There is also a list of recent changes.
+
+It is important that the system V shared memory
+segments are actually compiled into your kernel on
+the server machine.  The clients just need X.
+
+Create an appropriate directory for it.  The defs.h
+file contains the paths to this directory.  If you
+don't want it in /usr/games/lib/xtrek, change this
+file.
+
+A "make install" will perform the following steps for you.
+If you don't want xtrek and daemon to be suid to root
+or you don't like the choice of directories, either
+change DESTDIR, XTREKDIR and XTREKOWNER in the Makefile
+or perform these steps by hand:
+
+	Run make.  Install xtrek in /usr/games.  Robot and
+	daemon must be in /usr/games/lib/xtrek. Create the
+	files .motd, .scores, and .planets in
+	/usr/games/lib/xtrek.
+
+	Xtrek and the daemon must all be setuid
+	to someone who has write permission on these files.
+	Root is fine.  There are no real security holes in
+	the game.  If you want to avoid this, take out the
+	shared memory chmoding and make the dot files writable.
+
+If you want to change constants in the game, it is
+pretty well set up to allow tweaking.  Most of the
+constants are in defs.h.  Player constants were defined
+in getship.c in plans for a future custom designed ship
+option.
+
+nroff -me the document and put it somewhere useful.
+
+HP-UX notes:
+
+Althought I have compiled and run this version of xtrek on
+an HP-UX 5.2 system, there are some things to be aware of.
+First, my system was a 320.  If you have access to a 840 it
+would clearly be a better choice as a server.  It would also
+provide the wait3 function needed in some of the code.  I don't
+know how the wait's I've put into the code will work out.
+
+A 320 system, while being sufficient as a display for the game,
+would probably not work well as a server.
+
+Sun notes:
+
+Some code was added to prevent people from holding down the
+'t' key and generating fields of torps with the auto-repeat
+mode.  This uses the timer for the xevents and it's not clear
+that the timer works everywhere.
+
+There is one clear bug in the sun Xlib server that can make
+torpedoes occasionnally fail to fire.  If you want to fix this
+bug, replace the line of code in libsun/events.c:
+
+   xe->vse_time = (se->ie_time.tv_usec/10000 + se->ie_time.tv_sec);
+
+with
+
+   xe->vse_time = (se->ie_time.tv_usec/10000 + se->ie_time.tv_sec*100);
+
+It appears twice so get 'em both.  Note that this stuff is in the source
+to libX.a for the suns.
+
+Apollo Notes:
+
+We don't have an apollo to test the code out, but the following lines
+in the xlib code scare me:
+
+    /* this needs to be replaced with a "real" timestamp */
+    xe->vse_time += 1;
+
+I suspect that on an apollo, only one torp in ten will actually be fired.
+See the Sun notes above for more information.
+
+Ultrix notes:
+
+Before running make, look for random.o.  I found
+that the ultrix library version wasn't very random,
+so I substituted the 4.3 one which worked better.
+Licensing agreements being what they are, the
+version in this directory just links against
+whatever random.o is in libc.a.
+
+If you have the 4.3 random.o (or .c), just restore
+the commented-out reference to random.o in the Makefile
+and it will link against your copy. If we ever find a
+good public domain rand() function, this problem will
+go away.
+
+
+Changes from version 3.0 to version 4.0:
+
+Players cannot jump teams once in.  They must quit and rejoin
+to change teams.
+
+When a team loses its last planet, they cannot hold a coup for 30
+minutes to an hour of play time.
+
+There is an independent team that controls all planets with zero
+armies.
+
+Fuel cannot go negative now.
+
+Certain deaths will force you to exit the game completely.
+
+Some colors have been changed.
+
+Players may not bomb their own planets.  (Their crews have wives and
+children down there....)
+
+Since sys V compatibility seems to show up in most 4.3 based include
+files, I've gone over to the sys V names of some things like
+SIGCHLD -> SIGCLD.
+
+Fixed a bug with showstats that crashed in watch mode.
+
+There have been a number of changes to 'improve' play.  Not
+everyone agrees that they are for the better.  Ships now
+turn one warp faster.  Fuel is used by the engines -- you
+don't gain fuel at warp 5 anymore.
+
+Events now go through info windows properly.
+
+The special font effects occur in the info windows.
+
+The space key will now also close all special windows.
+
+You cannot repair and use transporters at the same time.
+
+There are a number of optimizations.  Hardcoding the lengths
+of planetnames reduced the number of calls to strlen.  The
+status line is now drawn by hand to save calls to doprnt().
+Also, the characters up on the map window for each ship are
+stored in the ship's data structure to avoid more calls to
+doprnt().
+
+Robots are a little smarter and slightly more aggressive.  This
+was meant to stop people from darting in and out while taking
+periphery planets.
+
+Overheated weapons can't be wrapped around.
+
+People who hold down the 't' key to get a burst of torps are
+in for a surprise.  Torps cannot be fired faster than one every
+tenth of a second.
+

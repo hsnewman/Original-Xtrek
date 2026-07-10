@@ -1,0 +1,90 @@
+.TH XTREKB 1 "8 August 1989" "X Version 11"
+.SH NAME
+xtrekb - xtrek biff program
+.SH SYNOPSIS
+.B xtrekb
+[-option ...]
+.SH DESCRIPTION
+The
+.I xtrekb
+program displays outlines of the four ship types used in the
+.I xtrek(6)
+game.
+When there are no active players for the given team, the ship points
+down; when there is at least one player on the team, the ship points
+up.
+.SH OPTIONS
+.I Xtrekb
+accepts the
+options listed below:
+.TP 8
+.B \-help
+This option indicates that a brief summary of the allowed options should be
+printed on the standard error output.
+.TP 8
+.B \-update \fIseconds\fP
+This option specifies the frequency in seconds at which \fIxtrekb\fP
+should update its display.
+.TP 8
+.B \-bg \fIcolor\fP
+This option specifies the color to use for the background of the window.
+The default is ``black.''
+.TP 8
+.B \-fg \fIcolor\fP
+This option specifies the color to use for the foreground of the window.
+The default is ``white.''
+This only applies to monochrome screens.
+On color screens, the ships are the colors of the various teams.
+.TP 8
+.B \-rv
+This option indicates that reverse video should be simulated by swapping
+the foreground and background colors.
+On all screens, the background becomes ``white'', and on
+monochrome screens the
+foreground ``black''.
+.TP 8
+.B \-geometry \fIgeometry\fP
+This option specifies the prefered size and position of the \fIxtrekb\fP window;
+see \fIX(1)\fP.
+.TP 8
+.B \-display \fIdisplay\fP
+This option specifies the X server to contact; see \fIX(1)\fP.
+.TP 8
+.B \-server \fIxtrek-server\fP
+This option specifies the machine to contact the main xtrek server program on.
+It defaults to the environment variable ``XTREKSERVER'' if set, otherwise
+the value ``xtrek-server''.
+.SH X DEFAULTS
+.PP
+.TP 8
+.B update (\fPclass\fB Interval)
+Specifies the frequency in seconds at which the Xtrek game should be checked.
+.TP 8
+.B reverseVideo (\fPclass\fB ReverseVideo)
+Specifies that the foreground and background should be reversed.
+.TP 8
+.B server (\fPclass\fB Server)
+Specifies the machine where the main xtrek server is running.
+.SH ENVIRONMENT
+.PP
+.TP 8
+.B DISPLAY
+to get the default host and display number.
+.TP 8
+.B XTREKSERVER
+to get the name of the host running the Xtrek game.
+.SH "SEE ALSO"
+X(1),
+xrdb(1),
+xtrek(6),
+stat(2)
+.SH COPYRIGHT
+Copyright 1988, Massachusetts Institute of Technology.
+.br
+See \fIX(1)\fP for a full statement of rights and permissions.
+.SH AUTHORS
+Dan Dickey
+.br
+Jeff Clark, Honeywell SRC (original widget based xtrekb)
+.br
+Jim Fulton, MIT X Consortium (original Athena/Mailbox widget)
