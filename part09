@@ -1,0 +1,1238 @@
+#! /bin/sh
+# This is a shell archive.  Remove anything before this line, then unpack
+# it by saving it into a file and typing "sh file".  To overwrite existing
+# If this archive is complete, you will see the following message at the end:
+#		"End of archive 9 (of 11)."
+#
+# Contents:
+#   input.c
+#
+# Wrapped by ddickey at cray.com on Thu Oct 11 11:43:58 1990
+#
+PATH=/bin:/usr/bin:/usr/ucb ; export PATH
+if test -f input.c -a "${1}" != "-c" ; then
+  echo shar: Will not over-write existing file \"input.c\"
+else
+echo shar: Extracting \"input.c\" \(32714 characters\)
+sed "s/^X//" >input.c <<'END_OF_input.c'
+Xstatic char sccsid[] = "@(#)input.c	3.1";
+X/*
+X
+X	Copyright (c) 1986 	Chris Guthrie
+X
+XPermission to use, copy, modify, and distribute this
+Xsoftware and its documentation for any purpose and without
+Xfee is hereby granted, provided that the above copyright
+Xnotice appear in all copies and that both that copyright
+Xnotice and this permission notice appear in supporting
+Xdocumentation.  No representations are made about the
+Xsuitability of this software for any purpose.  It is
+Xprovided "as is" without express or implied warranty.
+X
+X*/
+X
+X#include <X11/Xlib.h>
+X#include <X11/Xutil.h>
+X#include <stdio.h>
+X#include <math.h>
+X#if !defined(cray)
+X#include <sys/types.h>
+X#endif
+X#include <sys/socket.h>
+X
+X#ifdef SUN40
+X#include <sys/filio.h>
+X#else SUN40
+X#if !defined(cray)
+X# define	FD_SET(n, s)	(((s)->fds_bits[0]) |= (1 << n))
+X# define	FD_CLR(n, s)	(((s)->fds_bits[0]) &= ~(1 << n))
+X# define	FD_ZERO(s)	bzero((char *)(s), sizeof (*(s)))
+X# define	FD_ISSET(n, s)	(((s)->fds_bits[0]) & (1 << n))
+X#endif
+X#include <sys/ioctl.h>
+X#endif
+X
+X#ifdef hpux
+X#include <time.h>
+X#else hpux
+X#include <sys/time.h>
+X#endif hpux
+X
+X#include <signal.h>
+X#include <errno.h>
+X#include <setjmp.h>
+X#include "defs.h"
+X#include "data.h"
+X
+Xstatic int		doTheRedrawDude, skipUpdates = 1;
+Xstatic int		peerdied;
+Xstatic struct player	*xpendwho;
+Xstruct player	*vapor[MAXPLAYER];
+Xjmp_buf		xpendenv;
+Xint		jumpable = 0;
+Xint		vapor_cnt;
+X
+Xextern Window	openStats();
+Xextern char	*newwin();
+Xextern char	*winmapped();
+Xextern int	debug;
+X
+Xinitinput(p)
+Xregister struct player	*p;
+X{
+X    XSelectInput(p->display, p->iconWin, ExposureMask|SubstructureNotifyMask);
+X    XSelectInput(p->display, p->w,
+X	KeyPressMask|ButtonPressMask|ButtonReleaseMask|ExposureMask|SubstructureNotifyMask|FocusChangeMask|EnterWindowMask|LeaveWindowMask);
+X    XSelectInput(p->display, p->mapw,
+X	KeyPressMask|ButtonPressMask|ButtonReleaseMask|ExposureMask|SubstructureNotifyMask|FocusChangeMask|EnterWindowMask|LeaveWindowMask);
+X    XSelectInput(p->display, p->messagew,
+X	KeyPressMask|ButtonPressMask|ButtonReleaseMask|ExposureMask|SubstructureNotifyMask|FocusChangeMask|EnterWindowMask|LeaveWindowMask);
+X    XSelectInput(p->display, p->tstatw, ExposureMask|SubstructureNotifyMask);
+X
+X    XSelectInput(p->display, p->war, ExposureMask|SubstructureNotifyMask);
+X
+X    XSelectInput(p->display, p->warf, ButtonPressMask|ButtonReleaseMask|ExposureMask|SubstructureNotifyMask);
+X    XSelectInput(p->display, p->warr, ButtonPressMask|ButtonReleaseMask|ExposureMask|SubstructureNotifyMask);
+X    XSelectInput(p->display, p->wark, ButtonPressMask|ButtonReleaseMask|ExposureMask|SubstructureNotifyMask);
+X    XSelectInput(p->display, p->waro, ButtonPressMask|ButtonReleaseMask|ExposureMask|SubstructureNotifyMask);
+X    XSelectInput(p->display, p->wargo, ButtonPressMask|ButtonReleaseMask|ExposureMask|SubstructureNotifyMask);
+X    XSelectInput(p->display, p->warno, ButtonPressMask|ButtonReleaseMask|ExposureMask|SubstructureNotifyMask);
+X    XSelectInput(p->display, p->helpWin, ExposureMask|SubstructureNotifyMask);
+X    XSelectInput(p->display, p->planetw, ExposureMask|SubstructureNotifyMask);
+X    XSelectInput(p->display, p->playerw, ExposureMask|SubstructureNotifyMask);
+X}
+X
+Xint	loopcounter;
+Xint	maxloopcounter;
+X
+XsetRedrawFlag()
+X{
+X	if (skipUpdates)
+X		doTheRedrawDude = 1;
+X	else
+X		doTheRedrawDude++;
+X	if (maxloopcounter < loopcounter)
+X		maxloopcounter = loopcounter;
+X	loopcounter = 0;
+X}
+X
+Xvoid
+Xdeadpeer()
+X{
+X	if (xpendwho) {
+X		vapor[vapor_cnt++] = xpendwho;
+X		xpendwho = (struct player *) NULL;
+X	} else
+X		peerdied = 1;
+X
+X	if (debug)
+X		fprintf(stderr, "Got SIGPIPE, vapor_cnt=%d, jump=%d\n", vapor_cnt, jumpable);
+X
+X	signal(SIGPIPE, deadpeer);
+X
+X	if (jumpable)
+X		longjmp(xpendenv, 1);
+X}
+X
+Xint	playerchange;
+Xint	nplayers;
+Xint	nships;
+Xint	nrobots;
+X
+Xinput()
+X{
+X    struct player	*p;
+X    int		pno;
+X    XEvent	data;
+X    XEvent	*tmp;
+X    XDestroyWindowEvent		*xdwe;
+X    char	buf[128];
+X    char	sbuf[128];
+X    char	hostname[80];
+X    char	new_display[50], new_login[50], new_shipname[50];
+X    int		nchar;
+X    fd_set	ofdset, fdset;
+X    struct itimerval	udt;
+X    int			didevent;
+X    long		elapsed;
+X    int			noplayer_updates;
+X    int			query_wait;
+X    struct sockaddr	addr;
+X    int			addrlen;
+X    int			ns;
+X    int			on = 1;
+X    int			si;
+X    int			copilot;
+X    int			lastmaxloopcounter;
+X    int			running_away, eblocks_rcvd;
+X    XEvent		clmsg;
+X    int			val;
+X    long		xxxtime;
+X    extern char		*sys_errlist[];
+X
+X/*
+X * jas (Jeff Schmidt)  Determine server host name.
+X */
+X
+X    gethostname(hostname, sizeof(hostname));
+X
+X    signal(SIGALRM, setRedrawFlag);
+X#if !defined(cray)
+X    udt.it_interval.tv_sec = 0L;
+X    udt.it_interval.tv_usec = UPDATE;
+X    udt.it_value.tv_sec = 0L;
+X    udt.it_value.tv_usec = UPDATE;
+X    setitimer(ITIMER_REAL, &udt, (struct itimerval *) NULL);
+X#else
+X    ms_timer(UPDATE / 1000);
+X#endif
+X
+X    tmp = &data;
+X
+X    FD_ZERO(&ofdset);
+X    FD_ZERO(&fdset);
+X    playerchange = 1;
+X    nplayers = 0;
+X    nships = 0;
+X    nrobots = 0;
+X    noplayer_updates = 0;
+X    query_wait = 0;
+X    didevent = 1;
+X    ns = -1;
+X    vapor_cnt = 0;
+X    signal(SIGPIPE, deadpeer);
+X    loopcounter = 0;
+X    maxloopcounter = 0;
+X    lastmaxloopcounter = 0;
+X    running_away = 0;
+X    eblocks_rcvd = 0;
+X    while (1) {
+X	loopcounter++;
+X	if (maxloopcounter > lastmaxloopcounter) {
+X		lastmaxloopcounter = maxloopcounter;
+X		fprintf(stderr, "MAXLOOPCOUNTER=%d, RAN=%d, BLOCKS=%d, de=%d, pc=%d, np=%d\n", maxloopcounter, running_away, eblocks_rcvd, didevent, playerchange, nplayers);
+X	}
+X#ifndef NO_INETD
+X	/* NOTE: noplayer_updates only increments when nplayers is zero, */
+X	/*	Also, query_wait only decrements when noplayer_updates is */
+X	/*	over the limit. */
+X	if (ns < 0 && !nplayers && (noplayer_updates++ > (30 * UPS)) && (query_wait-- <= 0)) {
+X		save_planets();
+X#if !defined(NEWINET)
+X		drain_udp_socket();
+X#endif
+X		time(&xxxtime);
+X		fprintf(stderr, "in.xtrekd: exiting at %s\n", ctime(&xxxtime));
+X		exit(0);
+X	}
+X#endif /* NO_INETD */
+X	/* Handle the people who vaporized. */
+X	while (vapor_cnt) {
+X		p = vapor[--vapor_cnt];
+X		sprintf(buf, "%s (%c%x) vaporized", p->p_name,
+X			teamlet[p->p_ship->s_team], p->p_ship->s_no);
+X		pmessage(buf, 0, MALL, "GOD->ALL");
+X		if (debug)
+X			fprintf(stderr, "%s\n", buf);
+X		if (!p->p_copilot) {
+X			p->p_ship->s_whydead = KVAPOR;
+X			p->p_ship->s_whodead = p->p_ship->s_no;
+X			death(p);
+X			drop_copilots(p);
+X			p->p_ship->s_numpilots = 0;
+X		} else {
+X			calcstats(p);
+X			savestats(p);
+X			p->p_ship->s_numpilots--;
+X		}
+X		FD_CLR(p->xcn, &ofdset);
+X		close(p->xcn);
+X		p->xcn = 0;
+X		p->p_status = PFREE;
+X		p->p_warncount = 0;
+X	}
+X	if (!didevent) {
+X		fdset = ofdset;
+X		pno = select(32, &fdset, (fd_set *) NULL, (fd_set *) NULL, (struct timeval *) NULL);
+X		if (pno < 0) {
+X			FD_CLR(xtrek_socket, &fdset);
+X			if (ns > 0)
+X				FD_CLR(ns, &fdset);
+X		}
+X	}
+X	if (FD_ISSET(xtrek_socket, &fdset) || (ns > 0 && FD_ISSET(ns, &fdset))) {
+X		addrlen = sizeof (addr);
+X		errno = 0;
+X		if (ns == -1) {
+X			ns = accept(xtrek_socket, &addr, &addrlen);
+X			if (ns > 0) {
+X				si = 0;
+X				peerdied = 0;
+X				ioctl(ns, FIONBIO, &on);
+X				FD_SET(ns, &ofdset);
+X			}
+X		}
+X		errno = 0;
+X		if (ns > 0 && FD_ISSET(ns, &fdset)) {
+X			pno = read(ns, &sbuf[si], 1);
+X			if (pno > 0)
+X				si += pno;
+X			if (pno == 0)
+X				peerdied = 1;
+X			if (pno < 0) {
+X				if (errno == EWOULDBLOCK) {
+X					eblocks_rcvd++;
+X					playerchange = 1;
+X				} else {
+X					fprintf(stderr, "input, read: %s\n", sys_errlist[errno]);
+X					close(ns);
+X					ns = -1;
+X					peerdied = 1;
+X					running_away++;
+X				}
+X			} else
+X				eblocks_rcvd = 0;
+X
+X			if (pno > 0 && si >= 2 && sbuf[si-2] == '\015' && sbuf[si-1] == '\012') {
+X				sbuf[si-2] = '\0';
+X				copilot = MAXPLAYER;
+X				if (strcmp(sbuf, "Query?") == 0) {
+X					sprintf(sbuf, "F: %d, R: %d, K: %d, O:%d\n",
+X					     tcount[FED], tcount[ROM], tcount[KLI], tcount[ORI]);
+X					write(ns, sbuf, strlen(sbuf));
+X					/* Don't stop daemon for at least 5 minutes. */
+X					query_wait = 300 * UPS;
+X					close(ns);
+X					ns = -1;
+X				} else if (strcmp(sbuf, "RScore?") == 0) {
+X					scorelist((struct player *) NULL, ns);
+X					/* Don't stop daemon for at least 5 minutes. */
+X					query_wait = 300 * UPS;
+X					close(ns);
+X					ns = -1;
+X				} else if (strcmp(sbuf, "Players?") == 0) {
+X					playerlist((struct player *) NULL, ns);
+X					/* Don't stop daemon for at least 5 minutes. */
+X					query_wait = 300 * UPS;
+X					close(ns);
+X					ns = -1;
+X				} else if (strcmp(sbuf, "LScore?") == 0) {
+X					liststats(ns);
+X					/* Don't stop daemon for at least 5 minutes. */
+X					query_wait = 300 * UPS;
+X					close(ns);
+X					ns = -1;
+X				} else if (sscanf(sbuf, "Display: %s Login: %s Shipname: %s Copilot: %x", new_display, new_login, new_shipname, &copilot) != 4) {
+X					write(ns, "Bad format\n", 11);
+X					close(ns);
+X					ns = -1;
+X				} else {
+X					/* Trying to be copilot? */
+X					if (copilot < MAXPLAYER) {
+X						if (players[copilot].p_status != PALIVE) {
+X							sprintf(sbuf, "Ship %x is not alive.\n", copilot);
+X							write(ns, sbuf, strlen(sbuf));
+X							close(ns);
+X							ns = -1;
+X							goto noconnect;
+X						} else if (!(players[copilot].p_flags & PFCOPILOT)) {
+X							sprintf(sbuf, "Ship %x is not allowing copilots.\n", copilot);
+X							write(ns, sbuf, strlen(sbuf));
+X							close(ns);
+X							ns = -1;
+X							goto noconnect;
+X						}
+X					}
+X					sprintf(sbuf, "Connecting %s -> %s\n",
+X					  hostname, new_display);
+X					write(ns, sbuf, strlen(sbuf));
+X					pno = findslot();
+X					if (pno == MAXPLAYER) {
+X						write(ns, "No more room in game\n", 21);
+X					} else {
+X						strcpy(players[pno].p_monitor, new_display);
+X						strcpy(players[pno].p_login, new_login);
+X						strcpy(players[pno].p_shipname, new_shipname);
+X						if (copilot < MAXPLAYER) {
+X							char xp[32];
+X
+X							players[pno].p_ship = &ships[copilot];
+X							ships[copilot].s_numpilots++;
+X							players[pno].p_copilot = 1;
+X							sprintf(sbuf, "%s entered as a copilot for %c%1x",
+X								players[pno].p_login,
+X								teamlet[players[pno].p_ship->s_team],
+X								copilot);
+X							sprintf(xp, "GOD->%s", teamshort[players[pno].p_ship->s_team]);
+X							pmessage(sbuf, players[pno].p_ship->s_team, MTEAM, xp);
+X						} else {
+X							players[pno].p_ship = &ships[pno];
+X							ships[pno].s_team = 0;
+X							ships[pno].s_numpilots = 1;
+X							players[pno].p_copilot = 0;
+X						}
+X						players[pno].p_status = PSETUP;
+X						sprintf(sbuf, "%s, you are player number %d, %siloting ship number %d\n",
+X							new_login, pno,
+X							players[pno].p_copilot ? "Cop" : "P",
+X							players[pno].p_ship->s_no);
+X						write(ns, sbuf, strlen(sbuf));
+X					}
+X				}
+Xnoconnect:
+X				playerchange = 1;
+X			}
+X		}
+X	}
+X	if (peerdied) {
+X		peerdied = 0;
+X		close(ns);	/* Trying to get that runaway bug... */
+X		ns = -1;	/* Trying to get that runaway bug... */
+X		playerchange = 1;
+X	}
+X	if (playerchange) {
+X		FD_ZERO(&ofdset);
+X		FD_SET(xtrek_socket, &ofdset);
+X		if (ns > 0)
+X			FD_SET(ns, &ofdset);
+X		nplayers = 0;
+X		nships = 0;
+X		nrobots = 0;
+X		for (pno = 0, p = &players[pno]; pno < MAXPLAYER; pno++, p++) {
+X			if (p->p_status != PFREE) {
+X				nplayers++;
+X				if (p->p_ship->s_no == pno)
+X				    nships++;
+X				if ((p->p_flags & PFROBOT) != 0)
+X					nrobots++;
+X				else if (p->p_status != PSETUP)
+X					FD_SET(p->xcn, &ofdset);
+X			}
+X		}
+X		if (nplayers)
+X			noplayer_updates = 0;
+X		playerchange = 0;
+X	}
+X
+X	while (doTheRedrawDude-- > 0) {
+X		/* NOTE: Don't update system when we are only hanging around */
+X		/*	for the sake of queries. */
+X		if (nplayers)
+X			intrupt();
+X	}
+X
+X	didevent = 0;
+X	for (pno = 0, p = &players[0]; pno < MAXPLAYER; pno++, p++) {
+X		if (p->p_status == PFREE)
+X			continue;
+X
+X		if (p->p_status == PSETUP) {
+X			char	*rval;
+X
+X			playerchange = 1;
+X			rval = newwin(p);
+X			if (rval == (char *) NULL) {		/* Create new windows */
+X				p->p_pick = ((1<<FED)|(1<<ROM)|(1<<KLI)|(1<<ORI));	/* Team's they can pick from */
+X				FD_SET(p->xcn, &ofdset);
+X				close(ns);	/* Still trying to get the bug */
+X				ns = -1;	/* Still trying to get the bug */
+X			} else {
+X				fprintf(stderr, "Player %d (%s) -> %s\n", p->p_no, p->p_name ? p->p_name : "", rval);
+X				write(ns, rval, strlen(rval));
+X				write(ns, "\n", 1);
+X				if (p->display)
+X					XCloseDisplay(p->display);
+X				p->display = (Display *) NULL;
+X				p->p_ship->s_numpilots--;
+X				p->p_status = PFREE;
+X				p->p_warncount = 0;
+X				close(ns);
+X				ns = -1;
+X				continue;
+X			}
+X#ifdef notdef
+X			close(ns);
+X			ns = -1;
+X#endif
+X			if (p->p_status == PMAP)
+X				mapBase(p);		/* Map the baseWin... */
+X		}
+X
+X		if (p->p_status == POUTFIT && p->p_copilot) {
+X			playerchange = 1;
+X			p->p_status = PALIVE;
+X			enter(p->p_ship->s_team, XDisplayString(p->display), p->p_no);
+X		}
+X
+X		if (p->p_status == POUTFIT && (!p->p_copilot)) {
+X			playerchange = 1;
+X			if (!(p->p_flags & PFENTER)) {
+X				p->p_flags |= PFENTER;
+X				entrywindow(p);	/* Show them the entry window */
+X			} else {
+X				elapsed = time(0) - p->startTime;
+X				if (elapsed > AUTOQUIT) {
+X					playerchange = 1;
+X					XCloseDisplay(p->display);
+X					p->display = (Display *) NULL;
+X					p->p_status = PFREE;
+X					drop_copilots(p);
+X					p->p_ship->s_numpilots = 0;
+X					p->p_warncount = 0;
+X					p->p_flags &= ~PFENTER;
+X					continue;
+X				} else {
+X					showTimeLeft(p, elapsed, AUTOQUIT, 0);
+X					redrawFed(p, p->fwin, 0);
+X					redrawRom(p, p->rwin, 0);
+X					redrawKli(p, p->kwin, 0);
+X					redrawOri(p, p->owin, 0);
+X				}
+X			}
+X		}
+X
+X		if (!(FD_ISSET(p->xcn, &fdset))) {
+X			continue;
+X		}
+X
+X		if (p->p_flags & PFROBOT)
+X			continue;
+X
+X		/* Prepare for vaporizing people... */
+X		xpendwho = p;
+X		jumpable = 1;
+X		if (setjmp(xpendenv)) {
+X			if (!xpendwho) {
+X				/* Yup, they just vaporized. */
+X				continue;
+X			}
+X		}
+X		if (p->display == (Display *) NULL || !XPending(p->display)) {
+X			if (!xpendwho)
+X				continue;
+X			if (!p->display)
+X				fprintf(stderr, "Null display in input.\n");
+X			continue;
+X		}
+X
+X		xpendwho = p;
+X		jumpable = 1;
+X		if (setjmp(xpendenv)) {
+X			if (!xpendwho) {
+X				continue;
+X			}
+X		}
+X
+X		XNextEvent(p->display, (XEvent *)&data);	/* grab the event */
+X		jumpable = 0;
+X
+X		didevent = 1;
+X
+X		if (p->p_ship->s_updates > p->p_ship->s_delay) {
+X		    p->p_ship->s_flags &= ~(SFWAR);
+X		}
+X
+X		switch ((int) data.type) {
+X			/* Types to ignore... */
+X		    case KeyRelease:
+X		    case ButtonRelease:
+X		    case CreateNotify:
+X		    case ReparentNotify:
+X		    case FocusOut:
+X			break;
+X
+X		    case FocusIn:
+X			/* Something is showing... */
+X			p->p_flags &= ~PFNOTSHOWING;
+X			break;
+X		    case VisibilityNotify:
+X			if (data.xvisibility.window == p->baseWin) {
+X				if (data.xvisibility.state == VisibilityFullyObscured) {
+X					p->p_flags |= PFNOTSHOWING;
+X				} else {
+X					p->p_flags &= ~PFNOTSHOWING;
+X				}
+X			}
+X			break;
+X
+X		    case UnmapNotify:
+X			if (debug && data.xmap.window == p->iconWin) {
+X				fprintf(stderr, "Got UnmapNotify event for iconWin\n");
+X			}
+X			if (data.xmap.window == p->baseWin) {
+X				if (debug)
+X					fprintf(stderr, "Got UnmapNotify event for baseWin\n");
+X				clmsg.xclient.type = ClientMessage;
+X				clmsg.xclient.send_event = True;
+X				clmsg.xclient.display = p->display;
+X				clmsg.xclient.window = p->baseWin;
+X				clmsg.xclient.message_type = p->wm_change_state;
+X				clmsg.xclient.format = 32;
+X				clmsg.xclient.data.l[0] =  IconicState;
+X				val = XSendEvent(p->display, RootWindow(p->display, p->screen), False, (SubstructureRedirectMask|SubstructureNotifyMask), &clmsg);
+X				if (debug)
+X					fprintf(stderr, "XSendEvent(ClientMessage) = %d\n", val);
+X			}
+X			break;
+X
+X		    case EnterNotify:
+X			p->focus = 0;
+X			if (data.xcrossing.window == p->w) {
+X				p->focus = 1;
+X				XSetInputFocus(p->display, p->w, RevertToParent, data.xcrossing.time);
+X			} else if (data.xcrossing.window == p->mapw) {
+X				p->focus = 1;
+X				XSetInputFocus(p->display, p->mapw, RevertToParent, data.xcrossing.time);
+X			} else if (data.xcrossing.window == p->messagew) {
+X				p->focus = 1;
+X				XSetInputFocus(p->display, p->messagew, RevertToParent, data.xcrossing.time);
+X			}
+X			break;
+X
+X		    case LeaveNotify:
+X			p->focus = 0;
+X			break;
+X
+X		    case ClientMessage:
+X			if ((Atom) data.xclient.data.l[0] == p->wm_delete_window) {
+X				if (data.xclient.window == p->baseWin) {
+X					sprintf(buf, "%s (%c%x) vaporized", p->p_name,
+X						teamlet[p->p_ship->s_team], p->p_ship->s_no);
+X					pmessage(buf, 0, MALL, "GOD->ALL");
+X					if (!p->p_copilot) {
+X						p->p_ship->s_whydead = KVAPOR;
+X						p->p_ship->s_whodead = p->p_ship->s_no;
+X						death(p);
+X						drop_copilots(p);
+X						p->p_ship->s_numpilots = 0;
+X					} else {
+X						calcstats(p);
+X						savestats(p);
+X						p->p_ship->s_numpilots--;
+X					}
+X					playerchange = 1;
+X					XCloseDisplay(p->display);
+X					p->display = (Display *) NULL;
+X					p->p_status = PFREE;
+X					p->p_warncount = 0;
+X					p->p_flags &= ~PFENTER;
+X				} else if (data.xclient.window == p->helpWin) {
+X					XUnmapWindow(p->display, p->helpWin);
+X				} else if (data.xclient.window == p->statwin) {
+X					closeStats(p, p->statwin);
+X				}
+X			}
+X			break;
+X
+X		    case DestroyNotify:
+X			xdwe = &data.xdestroywindow;
+X			if (debug)
+X				fprintf(stderr, "Got DestroyNotify for Player %d\n", p->p_no);
+X			if (xdwe->window == p->baseWin) {
+X				if (debug)
+X					fprintf(stderr, "Got DestroyNotify for Player %d on the baseWin\n", p->p_no);
+X			}
+X			if (xdwe->window == p->helpWin) {
+X				if (debug)
+X					fprintf(stderr, "Got DestroyNotify for Player %d on the helpWin\n", p->p_no);
+X			}
+X			break;
+X
+X		    case KeyPress:
+X			if (!p->focus)
+X				break;
+X			if (p->p_status == POUTFIT && (!p->p_copilot)) {
+X				int	team;
+X
+X				team = -1;
+X				if (data.xkey.window == p->fwin)
+X					team = FED;
+X				else if (data.xkey.window == p->rwin)
+X					team = ROM;
+X				else if (data.xkey.window == p->kwin)
+X					team = KLI;
+X				else if (data.xkey.window == p->owin)
+X					team = ORI;
+X				else if (data.xkey.window == p->qwin) {
+X					playerchange = 1;
+X					XCloseDisplay(p->display);
+X					p->display = (Display *) NULL;
+X					p->p_status = PFREE;
+X					drop_copilots(p);
+X					p->p_ship->s_numpilots = 0;
+X					p->p_warncount = 0;
+X					p->p_flags &= ~PFENTER;
+X				}
+X				if (team >= 0) {
+X					del_entrywindow(p);
+X					XClearWindow(p->display, p->w);
+X					p->p_flags &= ~PFENTER;
+X					enter(team, XDisplayString(p->display), pno);
+X					start_copilots(p);
+X					playerchange = 1;
+X				}
+X				continue;
+X			}
+X			if (inputIgnored(p))
+X			    continue;
+X			if (p->p_ship->s_flags & SFSELFDEST) {
+X			    p->p_ship->s_flags &= ~SFSELFDEST;
+X			    warning(p, "Self Destruct has been canceled");
+X			}
+X			nchar = XLookupString(&tmp->xkey, buf, sizeof buf,
+X				(KeySym *)NULL, (XComposeStatus *)NULL);
+X			if (nchar > 0) {
+X			    if (data.xkey.window == p->messagew)
+X				smessage(p, *buf);
+X			    else
+X				keyaction(p, *buf, &tmp->xkey);
+X			}
+X			break;
+X
+X		    case ButtonPress:
+X			if (p->p_status == POUTFIT && (!p->p_copilot)) {
+X				int	team;
+X
+X				team = -1;
+X				if (data.xkey.window == p->fwin)
+X					team = FED;
+X				else if (data.xkey.window == p->rwin)
+X					team = ROM;
+X				else if (data.xkey.window == p->kwin)
+X					team = KLI;
+X				else if (data.xkey.window == p->owin)
+X					team = ORI;
+X				else if (data.xkey.window == p->qwin) {
+X					playerchange = 1;
+X					XCloseDisplay(p->display);
+X					p->display = (Display *) NULL;
+X					p->p_status = PFREE;
+X					drop_copilots(p);
+X					p->p_ship->s_numpilots = 0;
+X					p->p_warncount = 0;
+X					p->p_flags &= ~PFENTER;
+X				}
+X				if (team >= 0) {
+X					del_entrywindow(p);
+X					XClearWindow(p->display, p->w);
+X					p->p_flags &= ~PFENTER;
+X					enter(team, XDisplayString(p->display), pno);
+X					start_copilots(p);
+X					playerchange = 1;
+X				}
+X				continue;
+X			}
+X			if (inputIgnored(p))
+X				continue;
+X			if (p->p_ship->s_flags & SFSELFDEST) {
+X			    p->p_ship->s_flags &= ~SFSELFDEST;
+X			    warning(p, "Self Destruct has been canceled");
+X			}
+X			if (data.xbutton.window == p->warf)
+X			    waraction(p, &tmp->xbutton);
+X			else if (data.xbutton.window == p->warr)
+X			    waraction(p, &tmp->xbutton);
+X			else if (data.xbutton.window == p->wark)
+X			    waraction(p, &tmp->xbutton);
+X			else if (data.xbutton.window == p->waro)
+X			    waraction(p, &tmp->xbutton);
+X			else if (data.xbutton.window == p->wargo)
+X			    waraction(p, &tmp->xbutton);
+X			else if (data.xbutton.window == p->warno)
+X			    waraction(p, &tmp->xbutton);
+X			else
+X			    buttonaction(p, &tmp->xbutton);
+X			break;
+X
+X
+X		    case Expose:
+X			if (p->p_status == POUTFIT && (!p->p_copilot)) {
+X				if (data.xexpose.window == p->fwin)
+X					redrawFed(p, p->fwin, 1);
+X				else if (data.xexpose.window == p->rwin)
+X					redrawRom(p, p->rwin, 1);
+X				else if (data.xexpose.window == p->kwin)
+X					redrawKli(p, p->kwin, 1);
+X				else if (data.xexpose.window == p->owin)
+X					redrawOri(p, p->owin, 1);
+X				else if (data.xexpose.window == p->w)
+X					showMotd(p);
+X				else if (data.xexpose.window == p->qwin) {
+X					redrawQuit(p, p->qwin);
+X					elapsed = time(0) - p->startTime;
+X					showTimeLeft(p, elapsed, AUTOQUIT, 1);
+X				}
+X			}
+X			if (data.xexpose.window == p->statwin && (p->p_flags & PFSHOWSTATS))
+X				redrawStats(p, p->statwin);
+X			else if (data.xexpose.window == p->tstatw)
+X				redrawTstats(p);
+X			else if (data.xexpose.window == p->mapw)
+X			    p->p_redrawall = 1;
+X			else if (data.xexpose.window == p->iconWin)
+X			    drawIcon(p);
+X			else if (data.xexpose.window == p->helpWin)
+X			    fillhelp(p);
+X			else if (data.xexpose.window == p->playerw)
+X			    playerlist(p, 0);
+X			else if (data.xexpose.window == p->planetw)
+X			    planetlist(p);
+X			else if (data.xexpose.window == p->infow)
+X			    drawinfo(p);
+X			else if (data.xexpose.window == p->war)
+X			    warrefresh(p);
+X			else if (data.xexpose.window == p->warf)
+X			    warfed(p);
+X			else if (data.xexpose.window == p->warr)
+X			    warrom(p);
+X			else if (data.xexpose.window == p->wark)
+X			    warkli(p);
+X			else if (data.xexpose.window == p->waro)
+X			    warori(p);
+X			else if (data.xexpose.window == p->wargo)
+X			    wargo(p);
+X			else if (data.xexpose.window == p->warno)
+X			    warno(p);
+X			break;
+X
+X		    case MapNotify:
+X			if (p->p_status == PMAP && data.xmap.window == p->baseWin) {
+X				char *rval;
+X
+X				rval = winmapped(p);
+X				if (rval != (char *) NULL) {		/* Create new windows */
+X					fprintf(stderr, "Player %d (%s) -> %s\n", p->p_no, p->p_name ? p->p_name : "", rval);
+X					write(ns, rval, strlen(rval));
+X					write(ns, "\n", 1);
+X/* Don't do this...it is done in getFonts. XCloseDisplay(p->display); */
+X					p->display = (Display *) NULL;
+X					p->p_ship->s_numpilots--;
+X					p->p_status = PFREE;
+X					p->p_warncount = 0;
+X					playerchange = 1;
+X				}
+X				close(ns);
+X				ns = -1;
+X			}
+X			if (debug && data.xmap.window == p->iconWin) {
+X				fprintf(stderr, "Got MapNotify event for iconWin\n");
+X			}
+X			if (debug && data.xmap.window == p->baseWin) {
+X				fprintf(stderr, "Got MapNotify event for baseWin\n");
+X			}
+X			break;
+X
+X		    case ConfigureNotify:
+X			if (p->baseWin == data.xconfigure.window)
+X				resizewins(p, &data);
+X			break;
+X
+X		    default:
+X			if (debug) {
+X				fprintf(stderr, "Got event %d\n", data.type);
+X			}
+X			break;
+X		} /* switch */
+X	}
+X    } /* (infinite) loop */
+X}
+X
+Xdrop_copilots(p)
+Xregister struct player	*p;
+X{
+X	register struct player	*co;
+X	register int		i;
+X
+X	for (i = 0, co = &players[0]; i < MAXPLAYER; i++, co++) {
+X		if (co->p_status == PFREE)
+X			continue;
+X		if (co->p_ship == p->p_ship && co->p_copilot) {
+X			playerchange = 1;
+X			XCloseDisplay(co->display);
+X			co->display = (Display *) NULL;
+X			co->p_status = PFREE;
+X			co->p_warncount = 0;
+X			co->p_flags &= ~PFENTER;
+X		}
+X	}
+X}
+X
+Xstart_copilots(p)
+Xregister struct player	*p;
+X{
+X	register struct player	*co;
+X	register int		i;
+X
+X	for (i = 0, co = &players[0]; i < MAXPLAYER; i++, co++) {
+X		if (co->p_status == PFREE)
+X			continue;
+X		if (co->p_ship == p->p_ship && co->p_copilot) {
+X			enter(co->p_ship->s_team, XDisplayString(co->display), co->p_no);
+X			co->p_status = PALIVE;
+X			co->p_flags &= ~PFENTER;
+X		}
+X	}
+X}
+X
+Xkeyaction(p, key, data)
+Xstruct player	*p;
+Xchar key;
+XXKeyEvent *data;
+X{
+X    char buf[80];
+X    unsigned char course;
+X    struct obtype *gettarget(), *target;
+X    struct player *p2;
+X    struct planet *pl;
+X
+X    switch (key) {
+X	case '0':
+X	case '1':
+X	case '2':
+X	case '3':
+X	case '4':
+X	case '5':
+X	case '6':
+X	case '7':
+X	case '8':
+X	case '9':
+X	    set_speed(p, key - '0' + p->p_ship->s_Ten);
+X	    break;
+X	case 'X':
+X	    p->p_ship->s_Ten += 10;
+X	    break;
+X	case 'k': /* k = set course */
+X	    course = getcourse(p, data->window, data->x, data->y);
+X	    set_course(p, course);
+X	    p->p_ship->s_flags &= ~(SFSLOCK | SFPLLOCK);
+X	    break;
+X	case 'p': /* p = fire phasers */
+X	    course = getcourse(p, data->window, data->x, data->y);
+X	    phaser(p, course);
+X	    break;
+X	case 't': /* t = launch torps */
+X	    course = getcourse(p, data->window, data->x, data->y);
+X	    ntorp(p, course, isGod(p) ? TSTRAIGHT : TMOVE);
+X	    break;
+X	case 'd': /* d = detonate other torps */
+X	    detothers(p);
+X	    break;
+X	case 'D': /* D = detonate my torps */
+X	    detmine(p);
+X	    break;
+X	case '+': /* + = Put shields up */
+X	    shield_up(p);
+X	    break;
+X	case '-': /* - = Put shields down */
+X	    shield_down(p);
+X	    break;
+X	case 'u': /* u = toggle shields */
+X	    shield_tog(p);
+X	    break;
+X	case 'b': /* b = bomb planet */
+X	    bomb_planet(p);
+X	    break;
+X	case 'z': /* z = beam up */
+X	    beam_up(p);
+X	    break;
+X	case 'x': /* x = beam down */
+X	    beam_down(p);
+X	    break;
+X	case 'R': /* R = Go into repair mode */
+X	    p->p_ship->s_flags &= ~(SFSLOCK | SFPLLOCK);
+X	    repair(p);
+X	    break;
+X	case 'o': /* o = orbit nearest planet */
+X	    p->p_ship->s_flags &= ~(SFSLOCK | SFPLLOCK);
+X	    orbit(p);
+X	    break;
+X	case 'Q':
+X	    if (p->p_copilot) {
+X		p->p_copilot = 0;
+X		calcstats(p);
+X		savestats(p);
+X		playerchange = 1;
+X		XCloseDisplay(p->display);
+X		p->display = (Display *) NULL;
+X		p->p_ship->s_numpilots--;
+X		p->p_flags &= ~PFENTER;
+X		p->p_status = PFREE;
+X		break;
+X	    }
+X	    if (isGod(p)) {
+X			p->p_ship->s_explode = 1;
+X			p->p_ship->s_whydead = KQUIT;
+X			p->p_ship->s_status = EXPLODE;
+X			p->p_status = PDEAD;
+X	    } else {
+X		    p->p_ship->s_flags |= SFSELFDEST;
+X		    p->p_ship->s_selfdest = p->p_ship->s_updates + PSELFDESTTIME;
+X		    warning(p, "Self destruct initiated");
+X	    }
+X	    break;
+X	case 'Z':
+X		if (isGod(p)) {
+X		    target = gettarget(p, data->window, data->x, data->y,
+X			TARG_PLAYER);
+X		    if (target->o_type == PLAYERTYPE) {
+X			p2 = &players[target->o_num];
+X			if (!isGod(p2)) {
+X				p2->p_ship->s_status = EXPLODE;
+X				p2->p_ship->s_explode = PEXPTIME;
+X				p2->p_ship->s_whodead = p->p_no;
+X				p2->p_ship->s_whydead = KLIGHTNING;
+X			}
+X		    } else {
+X			sprintf(buf, "No players in range.");
+X			warning(p, buf);
+X		    }
+X		} else
+X		    XBell(p->display, 0);
+X		break;
+X	case '?': /* ? = Redisplay all messages */
+X	    repeat_message(p);
+X	    break;
+X	case '/': /* / = Stop redisplay all message. */
+X	    p->p_lastm = mctl->mc_current;
+X	    break;
+X	case 'c': /* c = cloak */
+X	    if (p->p_ship->s_flags & SFTOWING) {
+X		warning(p, "You can't use your Tractor Beams and Cloak at the same time.");
+X		break;
+X	    }
+X	    cloak(p);
+X	    break;
+X	case 'C': /* C = coups */
+X	    coup(p);
+X	    break;
+X	case 'l': /* l = lock onto */
+X	    /* since a robot would never use this function (it's user
+X	       Interface dependent,) all the work is done here instead
+X	       of in interface.c */
+X	    target = gettarget(p, data->window, data->x, data->y,
+X		TARG_PLAYER|TARG_PLANET);
+X	    if (target->o_type == PLAYERTYPE) {
+X		p->p_ship->s_flags |= SFSLOCK;
+X		p->p_ship->s_flags &= ~(SFPLLOCK|SFORBIT|SFBEAMUP|SFBEAMDOWN|SFBOMB);
+X		p->p_ship->s_shipl = target->o_num;
+X		p2 = &players[target->o_num];
+X		sprintf(buf, "Locking onto %s (%c%d)",
+X		    p2->p_name,
+X		    teamlet[p2->p_ship->s_team],
+X		    p2->p_ship->s_no);
+X		warning(p, buf);
+X	    }
+X	    else { 	/* It's a planet */
+X		p->p_ship->s_flags |= SFPLLOCK;
+X		p->p_ship->s_flags &= ~(SFSLOCK|SFORBIT|SFBEAMUP|SFBEAMDOWN|SFBOMB);
+X		p->p_ship->s_planet = target->o_num;
+X		pl = &planets[target->o_num];
+X		sprintf(buf, "Locking onto %s",
+X		    pl->pl_name);
+X		warning(p, buf);
+X	    }
+X	    break;
+X	case '@': /* @ = toggle copilot permissions */
+X	    p->p_flags ^= PFCOPILOT;
+X	    break;
+X	case '*': /* * = send in practice robot */
+X	    /* Only if no other players on OTHER teams. */
+X	    if (isGod(p))
+X		    startrobot((random() % NUMTEAM) + 1, PFRHOSTILE|PFPRACTICER);
+X	    else if (tcount[p->p_ship->s_team] - (nships - nrobots) == 0)
+X		    startrobot(p->p_ship->s_team, PFRHOSTILE|PFPRACTICER);
+X	    break;
+X	case '&': /* & = send in harder robot */
+X	    /* Only if no other players on OTHER teams. */
+X	    if (isGod(p))
+X		    startrobot((random() % NUMTEAM) + 1, PFRHARD|PFRHOSTILE|PFPRACTICER);
+X	    else if (tcount[p->p_ship->s_team] - (nships - nrobots) == 0)
+X		    startrobot(p->p_ship->s_team, PFRHARD|PFRHOSTILE|PFPRACTICER);
+X	    break;
+X	case '^': /* & = send in very hard robot */
+X	    /* Only if no other players on OTHER teams. */
+X	    if (isGod(p))
+X		    startrobot((random() % NUMTEAM) + 1, PFRVHARD|PFRHOSTILE|PFPRACTICER);
+X	    else if (tcount[p->p_ship->s_team] - (nships - nrobots) == 0)
+X		    startrobot(p->p_ship->s_team, PFRVHARD|PFRHOSTILE|PFPRACTICER);
+X	    break;
+X
+X	/* Start of display functions */
+X	case ' ': /* ' ' = clear special windows */
+X	    if (ismapped(p, p->playerw))
+X		XUnmapWindow(p->display, p->playerw);
+X	    if (ismapped(p, p->planetw))
+X		XUnmapWindow(p->display, p->planetw);
+X	    if (p->p_infomapped)
+X		destroyInfo(p);
+X	    if (ismapped(p, p->war))
+X		XUnmapWindow(p->display, p->war);
+X	    break;
+X	case 'L': /* L = Player list */
+X	    if (ismapped(p, p->playerw)) {
+X		XUnmapWindow(p->display, p->playerw);
+X	    } else {
+X		XMapWindow(p->display, p->playerw);
+X	    }
+X	    break;
+X	case 'P': /* P = Planet list */
+X	    if (ismapped(p, p->planetw)) {
+X		XUnmapWindow(p->display, p->planetw);
+X	    } else {
+X		XMapWindow(p->display, p->planetw);
+X	    }
+X	    break;
+X	case 'S': /* S = Score list */
+X	    if (p->p_infomapped)
+X		destroyInfo(p);
+X	    scorelist(p, 0);
+X	    break;
+X	case 's': /* s = toggle stat mode */
+X	   if (p->p_flags & PFSHOWSTATS) {
+X		closeStats(p, p->statwin);
+X	   } else {
+X		p->statwin = openStats(p);
+X	   }
+X	   break;
+X	case 'U': /* U = toggle show shields */
+X	   if (p->p_flags & PFSHOWSHIELDS) {
+X		p->p_flags &= ~PFSHOWSHIELDS;
+X	   } else {
+X		p->p_flags |= PFSHOWSHIELDS;
+X	   }
+X	   break;
+X	case 'M': /* M = Toggle Map mode */
+X	    if ((p->p_flags & PFNOMAPMODE) == 0)
+X		    p->p_mapmode = !p->p_mapmode;
+X	    break;
+X	case 'N': /* N = Toggle Name mode */
+X	    p->p_namemode = !p->p_namemode;
+X	    break;
+X	case 'i': /* i = get information */
+X	    if (!p->p_infomapped)
+X		inform(p, data->window, data->x, data->y);
+X	    else
+X		destroyInfo(p);
+X	    break;
+X	case 'h': /* h = Map help window */
+X	    if (ismapped(p, p->helpWin)) {
+X		XUnmapWindow(p->display, p->helpWin);
+X	    } else {
+X		XMapWindow(p->display, p->helpWin);
+X	    }
+X	    break;
+X	case 'w': /* w = map war stuff */
+X	    if (p->p_copilot) {
+X		warning(p, "Copilots cannot alter war settings");
+X		break;
+X	    }
+X	    if (ismapped(p, p->war)) {
+X		XUnmapWindow(p->display, p->war);
+X		p->p_redrawall = 1;
+X	    } else
+X		warwindow(p);
+X	    break;
+X	case 'T':  /* Try to tow someone (toggle switch). */
+X	    if (p->p_ship->s_flags & SFTOWING) {
+X		tow_off(p);
+X		break;
+X	    }
+X	    if (p->p_ship->s_flags & SFCLOAK) {
+X		warning(p, "You can't Cloak and use your Tractor Beams at the same time.");
+X		break;
+X	    }
+X	    target = gettarget(p, data->window, data->x, data->y,
+X		isGod(p) ? (TARG_PLAYER|TARG_PLANET) : TARG_PLAYER);
+X	    if (!isGod(p) && target->o_type != PLAYERTYPE) {
+X		/* Trying to tow a planet (or sun, or moon) */
+X		warning(p, "Don't be ridiculous.");
+X		break;
+X	    }
+X	    if (target->o_type == PLAYERTYPE && target->o_num == p->p_ship->s_no) {
+X		warning(p, "No ships found.");
+X		break;
+X	    }
+X	    tow_on(p, target);
+X	    break;
+X	default:
+X		fprintf(stderr, "Got unknown key 0x%x\n", key);
+X	    XBell(p->display, 0);
+X	    break;
+X    }
+X    if (key != 'X')
+X	p->p_ship->s_Ten = 0;
+X}
+X
+Xbuttonaction(p, data)
+Xregister struct player	*p;
+XXButtonEvent *data;
+X{
+X    unsigned char course;
+X
+X    if ((data->button & Button3) == Button3) {
+X	course = getcourse(p, data->window, data->x, data->y);
+X	p->p_ship->s_desdir = course;
+X	p->p_ship->s_flags &= ~(SFSLOCK | SFPLLOCK | SFORBIT);
+X    }
+X    else if ((data->button & Button1) == Button1) {
+X	course = getcourse(p, data->window, data->x, data->y);
+X	ntorp(p, course, isGod(p) ? TSTRAIGHT : TMOVE);
+X    }
+X    else if ((data->button & Button2) == Button2) {
+X	course = getcourse(p, data->window, data->x, data->y);
+X	phaser(p, course);
+X    }
+X}
+X
+Xgetcourse(p, ww, x, y)
+Xregister struct player	*p;
+XWindow ww;
+Xint x, y;
+X{
+X    unsigned char	iatan2();
+X
+X    if (ww == p->mapw) {
+X	int	me_x, me_y;
+X
+X	me_x = p->p_ship->s_x * p->p_xwinsize / GWIDTH;
+X	me_y = p->p_ship->s_y * p->p_ywinsize / GWIDTH;
+X	return(iatan2(x - me_x, me_y - y));
+X    }
+X    else
+X	return(iatan2(x - p->p_xwinsize / 2, p->p_ywinsize / 2 - y));
+X}
+X
+XinputIgnored(p)
+Xregister struct player	*p;
+X{
+X	if (p->p_status != PALIVE)
+X	    return (1);
+X	if (p->p_ship->s_flags & SFWAR) {
+X	    warning(p, "Battle computers being re-programmed");
+X	    return (1);
+X	}
+X	return (0);
+X}
+END_OF_input.c
+if test 32714 -ne `wc -c <input.c`; then
+    echo shar: \"input.c\" unpacked with wrong size!
+fi
+# end of overwriting check
+fi
+echo shar: End of archive 9 \(of 11\).
+cp /dev/null ark9isdone
+MISSING=""
+for I in 1 2 3 4 5 6 7 8 9 10 11 ; do
+    if test ! -f ark${I}isdone ; then
+	MISSING="${MISSING} ${I}"
+    fi
+done
+if test "${MISSING}" = "" ; then
+    echo You have unpacked all 11 archives.
+    rm -f ark[1-9]isdone ark[1-9][0-9]isdone
+else
+    echo You still need to unpack the following archives:
+    echo "        " ${MISSING}
+fi
+##  End of shell archive.
+exit 0

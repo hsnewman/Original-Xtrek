@@ -1,0 +1,1991 @@
+#! /bin/sh
+# This is a shell archive.  Remove anything before this line, then unpack
+# it by saving it into a file and typing "sh file".  To overwrite existing
+# If this archive is complete, you will see the following message at the end:
+#		"End of archive 1 (of 11)."
+#
+# Contents:
+#   DBG.c MANIFEST README TODO bitmaps.h clock.bitmap coup.c
+#   data.c data.h detonate.c dmessage.c itoa.c main.c orbit.c
+#   patchlevel.h phaser.c planetlist.c playerlist.c random.c scores.c
+#   torp.c util.c warning.c xtrek.man xtrekb.man xtrekfont.h
+#
+# Wrapped by ddickey at cray.com on Thu Oct 11 11:43:49 1990
+#
+PATH=/bin:/usr/bin:/usr/ucb ; export PATH
+if test -f DBG.c -a "${1}" != "-c" ; then
+  echo shar: Will not over-write existing file \"DBG.c\"
+else
+echo shar: Extracting \"DBG.c\" \(288 characters\)
+sed "s/^X//" >DBG.c <<'END_OF_DBG.c'
+Xstatic char sccsid[] = "@(#)DBG.c	3.1";
+X#include <X11/Xlib.h>
+X#include "defs.h"
+Xstatic int DEBUG = 1;
+X
+XDBG(p, fmt, a1)
+Xregister struct player	*p;
+Xregister char *fmt;
+Xregister unsigned a1;
+X{
+X	if (p && p->display)
+X		XSync(p->display, p->screen);
+X	if (DEBUG)
+X		printf("%s %d\n", fmt, a1);
+X}
+END_OF_DBG.c
+if test 288 -ne `wc -c <DBG.c`; then
+    echo shar: \"DBG.c\" unpacked with wrong size!
+fi
+# end of overwriting check
+fi
+if test -f MANIFEST -a "${1}" != "-c" ; then
+  echo shar: Will not over-write existing file \"MANIFEST\"
+else
+echo shar: Extracting \"MANIFEST\" \(1854 characters\)
+sed "s/^X//" >MANIFEST <<'END_OF_MANIFEST'
+X   File Name		Archive #	Description
+X-----------------------------------------------------------
+X DBG.c                     1
+X INSTALL                   2
+X INSTALL.old               2
+X Imakefile                 3
+X MANIFEST                  1	This shipping list
+X Makefile                  5
+X README                    1
+X TODO                      1
+X bitmaps.c                 2
+X bitmaps.h                 1
+X clock.bitmap              1
+X colors.c                  2
+X coup.c                    1
+X data.c                    1
+X data.h                    1
+X death.c                   2
+X defs.h                    3
+X detonate.c                1
+X dmessage.c                1
+X doc                       6
+X enter.c                   2
+X getship.c                 4
+X inform.c                  4
+X input.c                   9
+X interface.c               2
+X itoa.c                    1
+X main.c                    1
+X minisubs.c                5
+X newwin.c                 11
+X orbit.c                   1
+X patchlevel.h              1
+X phaser.c                  1
+X planetlist.c              1
+X planets.h                 2
+X playerlist.c              1
+X pstats.c                  3
+X random.c                  1
+X redraw.c                  8
+X rmove.c                   6
+X scorelist.c               2
+X scores.c                  1
+X sintab.c                  4
+X smessage.c                3
+X stats.c                   3
+X struct.h                  5
+X subdaemon.c              10
+X torp.c                    1
+X trigtab.c                 4
+X util.c                    1
+X war.c                     3
+X warning.c                 1
+X xtrek.bdf                 7
+X xtrek.c                   3
+X xtrek.man                 1
+X xtrek_ship.man            4
+X xtrekb.c                  5
+X xtrekb.man                1
+X xtrekfont.h               1
+END_OF_MANIFEST
+if test 1854 -ne `wc -c <MANIFEST`; then
+    echo shar: \"MANIFEST\" unpacked with wrong size!
+fi
+# end of overwriting check
+fi
+if test -f README -a "${1}" != "-c" ; then
+  echo shar: Will not over-write existing file \"README\"
+else
+echo shar: Extracting \"README\" \(1645 characters\)
+sed "s/^X//" >README <<'END_OF_README'
+XThis is an updated version of an older xtrek that I released some time ago.
+XThere are at least four versions of xtrek that I know about, all with
+Xdifferent version labeling.  To attempt to clear things up just a little
+Xbit, this will be known as xtrek version D3.1.
+X
+XIn addition to many many bug fixes, which are too numerous to write down
+X(actually, I can't remember them all...some were quite a while ago!),
+Xthere are new features added.
+X
+XSome of the added features over the last released version:
+X    - X features:
+X	- Code to allow resizing the windows.  This will allow xtrek to
+X	  be played on something with a screen the size of a PC.
+X	- Bug fixes for the input() routine.  If you use this routine
+X	  in other multi-user applications, be sure to take a look
+X	  at the changes here.
+X	- Attempt to be ICCCM compliant.
+X		- Window managers that the game was tested under include:
+X			olwm, twm, mwm
+X
+X    - Game features:
+X	- Tractor beams are implemented
+X	- Copiloting is implemented, though not extensively tested.
+X	- A "god" ship for the implementor to keep an eye on things.
+X	- Many changes to the robots.
+X		- Three types:  Easy, Hard, Very Hard
+X		- Robots, if friendly & on your team, will aid you.
+X		- Robots will protect non-system planets.  (New code, not
+X		  extensively tested)
+X		- Other changes (don't remember them all)
+X	- Player ship modification code has been tuned somewhat to allow
+X	  better playability.
+X
+X
+XIf you need to make ANY changes to this version to make it run on
+Xyour system, I'd appreciate receiving some email with notes about what
+Xyou needed to change; patches will be smiled upon.
+X
+X	-Dan A. Dickey		ddickey at cray.com
+END_OF_README
+if test 1645 -ne `wc -c <README`; then
+    echo shar: \"README\" unpacked with wrong size!
+fi
+# end of overwriting check
+fi
+if test -f TODO -a "${1}" != "-c" ; then
+  echo shar: Will not over-write existing file \"TODO\"
+else
+echo shar: Extracting \"TODO\" \(312 characters\)
+sed "s/^X//" >TODO <<'END_OF_TODO'
+XThings to be done...
+X
+X-	Fix scoring routines.  They are hopelessly confused.
+X	Need a better way to manage scores than listing by name:display.
+X-	Upgrade documentation/man pages
+X
+XIf you do any of these things, send patches, files, notes, questions to
+Xddickey at cray.com
+X/* static char sccsid[] = "@(#)TODO	3.1"; */
+END_OF_TODO
+if test 312 -ne `wc -c <TODO`; then
+    echo shar: \"TODO\" unpacked with wrong size!
+fi
+# end of overwriting check
+fi
+if test -f bitmaps.h -a "${1}" != "-c" ; then
+  echo shar: Will not over-write existing file \"bitmaps.h\"
+else
+echo shar: Extracting \"bitmaps.h\" \(1354 characters\)
+sed "s/^X//" >bitmaps.h <<'END_OF_bitmaps.h'
+X/* DO NOT EDIT THIS FILE. It is machine generated. */
+X/*
+Xstatic char sccsid[] = "@(#)bitmaps.c	3.1";
+X
+X	Copyright (c) 1986 	Chris Guthrie
+X
+XPermission to use, copy, modify, and distribute this
+Xsoftware and its documentation for any purpose and without
+Xfee is hereby granted, provided that the above copyright
+Xnotice appear in all copies and that both that copyright
+Xnotice and this permission notice appear in supporting
+Xdocumentation.  No representations are made about the
+Xsuitability of this software for any purpose.  It is
+Xprovided "as is" without express or implied warranty.
+X
+X*/
+X
+X#include <X11/X.h>
+X
+X/**** These are the ships ****/
+X#define VIEWS		16
+X#define ship_width	16
+X#define ship_height	16
+X
+X/**** These are the explosions ****/
+X
+X#define ex_width	64
+X#define ex_height	64
+X
+X/**** These are the misc things ****/
+X
+X#define cloud_width 7
+X#define cloud_height 7
+X
+X#define etorp_width 3
+X#define etorp_height 3
+X
+X#define mtorp_width 3
+X#define mtorp_height 3
+X
+X#define crossw 15
+X#define crossh 15
+X
+X#define crossmask_width 15
+X#define crossmask_height 15
+X
+X#define planet_width 30
+X#define planet_height 30
+X
+X#define mplanet_width 16
+X#define mplanet_height 16
+X
+X#define shield_width 20
+X#define shield_height 20
+X
+X#define icon_width 64
+X#define icon_height 64
+Xextern char icon_bits[];
+X
+X#define stipple_width 16
+X#define stipple_height 16
+Xextern char stipple_bits[];
+X
+END_OF_bitmaps.h
+if test 1354 -ne `wc -c <bitmaps.h`; then
+    echo shar: \"bitmaps.h\" unpacked with wrong size!
+fi
+# end of overwriting check
+fi
+if test -f clock.bitmap -a "${1}" != "-c" ; then
+  echo shar: Will not over-write existing file \"clock.bitmap\"
+else
+echo shar: Extracting \"clock.bitmap\" \(1930 characters\)
+sed "s/^X//" >clock.bitmap <<'END_OF_clock.bitmap'
+X/* static char sccsid[] = "@(#)clock.bitmap	3.1"; */
+X#define clock_width 48
+X#define clock_height 48
+Xstatic char clock_bits[] = {
+X   0x00, 0x00, 0xf8, 0x0f, 0x00, 0x00, 0x00, 0x80, 0x87, 0xf0, 0x00, 0x00,
+X   0x00, 0x60, 0x80, 0x00, 0x03, 0x00, 0x00, 0x18, 0x80, 0x00, 0x0c, 0x00,
+X   0x00, 0x14, 0x00, 0x00, 0x10, 0x00, 0x00, 0x23, 0x00, 0x00, 0x68, 0x00,
+X   0x80, 0x00, 0x00, 0x00, 0x84, 0x00, 0x40, 0x00, 0x00, 0x00, 0x00, 0x01,
+X   0x20, 0x00, 0x00, 0x00, 0x00, 0x02, 0x20, 0x00, 0x00, 0x00, 0x00, 0x02,
+X   0x10, 0x00, 0x00, 0x00, 0x00, 0x04, 0x18, 0x00, 0x00, 0x00, 0x00, 0x08,
+X   0x28, 0x00, 0x00, 0x00, 0x00, 0x0c, 0x04, 0x00, 0x00, 0x00, 0x00, 0x12,
+X   0x04, 0x00, 0x00, 0x00, 0x00, 0x10, 0x02, 0x00, 0x00, 0x00, 0x00, 0x20,
+X   0x02, 0x00, 0x00, 0x00, 0x00, 0x20, 0x02, 0x00, 0x00, 0x00, 0x00, 0x20,
+X   0x02, 0x00, 0x00, 0x00, 0x00, 0x20, 0x01, 0x00, 0x00, 0x00, 0x00, 0x40,
+X   0x01, 0x00, 0x00, 0x00, 0x00, 0x40, 0x01, 0x00, 0x00, 0x00, 0x00, 0x40,
+X   0x01, 0x00, 0x00, 0x00, 0x00, 0x40, 0x0f, 0x00, 0x80, 0x00, 0x00, 0x78,
+X   0x01, 0x00, 0x00, 0x00, 0x00, 0x40, 0x01, 0x00, 0x00, 0x00, 0x00, 0x40,
+X   0x01, 0x00, 0x00, 0x00, 0x00, 0x40, 0x01, 0x00, 0x00, 0x00, 0x00, 0x40,
+X   0x02, 0x00, 0x00, 0x00, 0x00, 0x20, 0x02, 0x00, 0x00, 0x00, 0x00, 0x20,
+X   0x02, 0x40, 0xdd, 0x5d, 0x01, 0x20, 0x02, 0x80, 0xc8, 0xcc, 0x00, 0x20,
+X   0x04, 0x40, 0x49, 0x5d, 0x01, 0x10, 0x04, 0x00, 0x00, 0x00, 0x00, 0x10,
+X   0x28, 0x00, 0x00, 0x00, 0x00, 0x0a, 0x18, 0x00, 0x00, 0x00, 0x00, 0x0c,
+X   0x10, 0x00, 0x00, 0x00, 0x00, 0x04, 0x20, 0x00, 0x00, 0x00, 0x00, 0x02,
+X   0x20, 0x00, 0x00, 0x00, 0x00, 0x02, 0x40, 0x00, 0x00, 0x00, 0x00, 0x01,
+X   0x80, 0x00, 0x00, 0x00, 0x80, 0x00, 0x00, 0x23, 0x00, 0x00, 0x62, 0x00,
+X   0x00, 0x14, 0x00, 0x00, 0x14, 0x00, 0x00, 0x18, 0x80, 0x00, 0x0c, 0x00,
+X   0x00, 0x60, 0x80, 0x00, 0x03, 0x00, 0x00, 0x80, 0x87, 0xf0, 0x00, 0x00,
+X   0x00, 0x00, 0xf8, 0x0f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+END_OF_clock.bitmap
+if test 1930 -ne `wc -c <clock.bitmap`; then
+    echo shar: \"clock.bitmap\" unpacked with wrong size!
+fi
+# end of overwriting check
+fi
+if test -f coup.c -a "${1}" != "-c" ; then
+  echo shar: Will not over-write existing file \"coup.c\"
+else
+echo shar: Extracting \"coup.c\" \(1940 characters\)
+sed "s/^X//" >coup.c <<'END_OF_coup.c'
+Xstatic char sccsid[] = "@(#)coup.c	3.1";
+X/*
+X
+X	Copyright (c) 1986 	Chris Guthrie
+X
+XPermission to use, copy, modify, and distribute this
+Xsoftware and its documentation for any purpose and without
+Xfee is hereby granted, provided that the above copyright
+Xnotice appear in all copies and that both that copyright
+Xnotice and this permission notice appear in supporting
+Xdocumentation.  No representations are made about the
+Xsuitability of this software for any purpose.  It is
+Xprovided "as is" without express or implied warranty.
+X
+X*/
+X
+X
+X#include <X11/Xlib.h>
+X
+X/* Cray X11/Xlib.h includes sys/types.h */
+X#if !defined(cray)
+X#include <sys/types.h>
+X#endif
+X#include <stdio.h>
+X#include "defs.h"
+X#include "data.h"
+X
+X/* throw a coup */
+X
+Xcoup(p)
+Xregister struct player	*p;
+X{
+X    register int i;
+X    register struct planet *l;
+X
+X    if (p->p_ship->s_stats.st_kills < 1.0) {
+X	warning(p, "You must have one kill to throw a coup");
+X	return;
+X    }
+X    if (!(p->p_ship->s_flags & SFORBIT)) {
+X	warning(p, "You must orbit your home planet to throw a coup");
+X	return;
+X    }
+X    for (i = 0, l = &planets[0]; i < MAXPLANETS; i++, l++) {
+X	if ((l->pl_owner == p->p_ship->s_team) && (l->pl_armies > 0)) {
+X	    warning(p, "You already own a planet!!!");
+X	    return;
+X	}
+X    }
+X    l = &pdata[p->p_ship->s_planet];	/* Original planet info */
+X
+X    if ((!(l->pl_flags & PLHOME)) || (l->pl_owner != p->p_ship->s_team)) {
+X	warning(p, "You must orbit your home planet to throw a coup");
+X	return;
+X    }
+X
+X    l = &planets[p->p_ship->s_planet];	/* Planet player is orbiting...current info */
+X
+X    if (l->pl_armies > 4) {
+X	warning(p, "Too many armies on planet to throw a coup");
+X	return;
+X    }
+X
+X    if (l->pl_couptime > 0) {
+X	warning(p, "Planet not yet ready for a coup");
+X	return;
+X    }
+X
+X    if (l->pl_flags & PLCOUP) { /* Avoid race conditions */
+X	return;
+X    }
+X
+X    /* the cases are now met.  We can have a coup. */
+X
+X    l->pl_flags |= PLCOUP;
+X    p->p_ship->s_stats.st_coups++;
+X}
+END_OF_coup.c
+if test 1940 -ne `wc -c <coup.c`; then
+    echo shar: \"coup.c\" unpacked with wrong size!
+fi
+# end of overwriting check
+fi
+if test -f data.c -a "${1}" != "-c" ; then
+  echo shar: Will not over-write existing file \"data.c\"
+else
+echo shar: Extracting \"data.c\" \(1605 characters\)
+sed "s/^X//" >data.c <<'END_OF_data.c'
+Xstatic char sccsid[] = "@(#)data.c	3.1";
+X
+X/*
+X
+X	Copyright (c) 1986 	Chris Guthrie
+X
+XPermission to use, copy, modify, and distribute this
+Xsoftware and its documentation for any purpose and without
+Xfee is hereby granted, provided that the above copyright
+Xnotice appear in all copies and that both that copyright
+Xnotice and this permission notice appear in supporting
+Xdocumentation.  No representations are made about the
+Xsuitability of this software for any purpose.  It is
+Xprovided "as is" without express or implied warranty.
+X
+X*/
+X
+X#include <X11/Xlib.h>
+X#include "defs.h"
+X#include "data.h"
+X
+Xint	xtrek_socket;
+Xint	udp_socket;
+X
+X/* Main library directory */
+Xchar	DIR[128] = "/usr/lib/X11/xtrek";
+X
+Xstruct player players[MAXPLAYER];
+Xstruct ship ships[MAXPLAYER];
+Xstruct torp torps[MAXPLAYER * MAXTORP];
+Xstruct planet planets[MAXPLANETS];
+Xstruct phaser phasers[MAXPLAYER];
+Xstruct message messages[MAXMESSAGE];
+Xstruct mctl mctl[MAXMESSAGE];
+Xstruct universe universe = {
+X	0,
+X	{	/* The list of people that can becomegod() */
+X		/* Up to MAXPLAYER of them. */
+X		"ddickey:fizban:0.0",
+X		"ddickey:aspen04:0.0",
+X		"ddickey:fir35:0.0",
+X		"ddickey:unix:0.0",
+X		0
+X	}
+X};
+X
+Xint	udcounter;
+Xint	debug = 0;
+Xint	tcount[MAXTEAM + 1];
+X
+Xextern long	isin[], icos[];		 /* Initialized in trigtab.c */
+X
+Xchar teamlet[] = {'X', 'F', 'R', 'K', 'O', 'I', 'N', 'G'};
+Xchar *teamshort[8] = {"XXX", "FED", "ROM", "KLI", "ORI", "IND", "NOT", "GOD"};
+Xchar *teamlong[8] = {"XXX", "Federation", "Romulan Empire", "Klingon Empire", "Orion Nest", "Independent Organization", "NOT", "GOD"};
+Xchar *rnames[5] = { "", "M5", "Colossus", "Guardian", "HAL" };
+END_OF_data.c
+if test 1605 -ne `wc -c <data.c`; then
+    echo shar: \"data.c\" unpacked with wrong size!
+fi
+# end of overwriting check
+fi
+if test -f data.h -a "${1}" != "-c" ; then
+  echo shar: Will not over-write existing file \"data.h\"
+else
+echo shar: Extracting \"data.h\" \(1124 characters\)
+sed "s/^X//" >data.h <<'END_OF_data.h'
+X/* static char sccsid[] = "@(#)data.h	3.1"; */
+X/*
+X
+X	Copyright (c) 1986 	Chris Guthrie
+X
+XPermission to use, copy, modify, and distribute this
+Xsoftware and its documentation for any purpose and without
+Xfee is hereby granted, provided that the above copyright
+Xnotice appear in all copies and that both that copyright
+Xnotice and this permission notice appear in supporting
+Xdocumentation.  No representations are made about the
+Xsuitability of this software for any purpose.  It is
+Xprovided "as is" without express or implied warranty.
+X
+X*/
+X
+Xextern int	xtrek_socket;
+X
+Xextern char	DIR[128];
+X
+Xextern struct player players[MAXPLAYER];
+Xextern struct ship ships[MAXPLAYER];
+Xextern struct torp torps[MAXPLAYER * MAXTORP];
+Xextern struct planet planets[MAXPLANETS];
+Xextern struct planet pdata[MAXPLANETS];
+Xextern struct phaser phasers[MAXPLAYER];
+Xextern struct message messages[MAXMESSAGE];
+Xextern struct mctl mctl[MAXMESSAGE];
+Xextern struct universe universe;
+X
+Xextern int remap[];
+Xextern int udcounter;
+Xextern int tcount[MAXTEAM + 1];
+X
+Xextern long	isin[], icos[];
+X
+Xextern char teamlet[];
+Xextern char *teamshort[];
+Xextern char *teamlong[];
+END_OF_data.h
+if test 1124 -ne `wc -c <data.h`; then
+    echo shar: \"data.h\" unpacked with wrong size!
+fi
+# end of overwriting check
+fi
+if test -f detonate.c -a "${1}" != "-c" ; then
+  echo shar: Will not over-write existing file \"detonate.c\"
+else
+echo shar: Extracting \"detonate.c\" \(3295 characters\)
+sed "s/^X//" >detonate.c <<'END_OF_detonate.c'
+Xstatic char sccsid[] = "@(#)detonate.c	3.1";
+X
+X/*
+X
+X	Copyright (c) 1986 	Chris Guthrie
+X
+XPermission to use, copy, modify, and distribute this
+Xsoftware and its documentation for any purpose and without
+Xfee is hereby granted, provided that the above copyright
+Xnotice appear in all copies and that both that copyright
+Xnotice and this permission notice appear in supporting
+Xdocumentation.  No representations are made about the
+Xsuitability of this software for any purpose.  It is
+Xprovided "as is" without express or implied warranty.
+X
+X*/
+X
+X#include <X11/Xlib.h>
+X#include <stdio.h>
+X#if !defined(cray)
+X#include <sys/types.h>
+X#endif
+X#include "defs.h"
+X#include "data.h"
+X
+X/* Detonate torp */
+X
+X/*
+X** Detonating torps have become a difficult part of the game.  Players
+X** quickly learned that detonating their own torps when the cloud was
+X** around another player, caused that player to die very quickly.  I
+X** removed that feature because it lead to people not having to shoot
+X** well to collect kills.  Now when players detonate their own torps,
+X** the torps just vanish and become available for future firing.
+X** NOTE:  BOOO!  Put this back in!
+X** NOTE2:  It is now back in.  It should be this way.
+X** NOTE3:  But don't have friendly torps do damage!
+X*/
+X
+Xdetmine(p)
+Xregister struct player	*p;
+X{
+X    register int i;
+X
+X    if (p->p_ship->s_flags & SFWEP) {
+X	warning(p, "Weapons overheated");
+X	return;
+X    }
+X    if (p->p_ship->s_fuel < p->p_ship->s_detcost) {
+X	warning(p, "Not enough fuel to fire detonators.");
+X	return;
+X    }
+X    p->p_ship->s_fuel -= p->p_ship->s_detcost;
+X    p->p_ship->s_wtemp += p->p_ship->s_detcost / 25;
+X
+X    for (i = 0; i < MAXTORP; i++) {
+X	if (torps[i + (p->p_ship->s_no * MAXTORP)].t_status == TMOVE) {
+X	    torps[i + (p->p_ship->s_no * MAXTORP)].t_status = TDET;
+X	} else if (torps[i + (p->p_ship->s_no * MAXTORP)].t_status == TSTRAIGHT) {
+X	    torps[i + (p->p_ship->s_no * MAXTORP)].t_status = TDET;
+X	}
+X    }
+X}
+X
+X/*
+X** Here we have another flaw.  Detonating other players torps can be a
+X** very quick way to die.  Why?  Because you always take some damage.
+X** Experienced players never detonate other players' torps.  Balance is
+X** really hard to obtain with this type of function.  Technically, a
+X** player could nearly continuously detonate torps (at least faster than
+X** they could be fired) and never be hurt, if I allowed less damage as
+X** a possible result.  So here it sits.
+X*/
+X
+Xdetothers(p)
+Xregister struct player	*p;
+X{
+X    register int h, i;
+X    int dx, dy;
+X    register struct torp *j;
+X
+X    if (p->p_ship->s_fuel < p->p_ship->s_detcost) {
+X	warning(p, "Not enough fuel to fire detonators.");
+X	return;
+X    }
+X    if (p->p_ship->s_flags & SFWEP) {
+X	warning(p, "Weapons overheated");
+X	return;
+X    }
+X    p->p_ship->s_fuel -= p->p_ship->s_detcost;
+X    p->p_ship->s_wtemp += p->p_ship->s_detcost / 25;
+X
+X    for (h = 0; h < MAXPLAYER; h++) {
+X	if ((players[h].p_status == PFREE) || (h == p->p_ship->s_no))
+X	    continue;
+X	for (i = h * MAXTORP; i < MAXTORP * (h + 1); i++) {
+X	    j = &torps[i];
+X	    if ((j->t_status == TMOVE) || (j->t_status == TSTRAIGHT)) {
+X		dx = j->t_x - p->p_ship->s_x;
+X		dy = j->t_y - p->p_ship->s_y;
+X		if (ABS(dx) > DETDIST || ABS(dy) > DETDIST) /* XXX */
+X		    continue;
+X		if (dx * dx + dy * dy < DETDIST * DETDIST)
+X		    j->t_status = TDET;
+X	    }
+X	}
+X    }
+X}
+END_OF_detonate.c
+if test 3295 -ne `wc -c <detonate.c`; then
+    echo shar: \"detonate.c\" unpacked with wrong size!
+fi
+# end of overwriting check
+fi
+if test -f dmessage.c -a "${1}" != "-c" ; then
+  echo shar: Will not over-write existing file \"dmessage.c\"
+else
+echo shar: Extracting \"dmessage.c\" \(1919 characters\)
+sed "s/^X//" >dmessage.c <<'END_OF_dmessage.c'
+Xstatic char sccsid[] = "@(#)dmessage.c	3.1";
+X
+X/*
+X
+X	Copyright (c) 1986 	Chris Guthrie
+X
+XPermission to use, copy, modify, and distribute this
+Xsoftware and its documentation for any purpose and without
+Xfee is hereby granted, provided that the above copyright
+Xnotice appear in all copies and that both that copyright
+Xnotice and this permission notice appear in supporting
+Xdocumentation.  No representations are made about the
+Xsuitability of this software for any purpose.  It is
+Xprovided "as is" without express or implied warranty.
+X
+X*/
+X
+X#include <X11/Xlib.h>
+X#include <stdio.h>
+X#include <math.h>
+X#include <signal.h>
+X#include "defs.h"
+X#include "data.h"
+X
+Xdmessage(p)
+Xregister struct player	*p;
+X{
+X    struct message *cur;
+X    char buf[80];
+X
+X/*    if (p->p_umsg.m_pending || (p->p_flags & PFENTER))*/
+X    if (p->p_umsg.m_pending)
+X	return;
+X
+X    if (mctl->mc_current == p->p_lastm) {
+X	if (p->p_mdisplayed) {
+X	    XFillRectangle(p->display, p->messagew, p->cleargc, p->dfont->ascent, 5,
+X		p->p_lastcount, fontHeight(p->dfont));
+X	    p->p_mdisplayed = 0;
+X	}
+X	return;
+X    }
+X    do {
+X	if (++(p->p_lastm) >= MAXMESSAGE)
+X	    p->p_lastm = 0;
+X	cur = &messages[p->p_lastm];
+X	if (cur->m_flags & MVALID) {
+X	    if (isGod(p) || (cur->m_flags & MALL) ||
+X		((cur->m_flags & MTEAM) && (cur->m_recpt == p->p_ship->s_team)) ||
+X		((cur->m_flags & MINDIV) && (cur->m_recpt == p->p_ship->s_no))) {
+X		    if (p->p_mdisplayed) {
+X		        XFillRectangle(p->display, p->messagew, p->cleargc, p->dfont->ascent, 5,
+X			    p->p_lastcount, fontHeight(p->dfont));
+X			p->p_mdisplayed = 0;
+X		    }
+X		    (void) sprintf(buf, "%s", cur->m_data);
+X		    p->p_lastcount = XTextWidth(p->dfont, buf, strlen(buf));
+X		    XDrawImageString(p->display, p->messagew, p->dfgc, p->dfont->ascent, 5 + p->dfont->ascent, buf, strlen(buf));
+X		    XBell(p->display, p->screen);
+X		    p->p_mdisplayed = 1;
+X		    return;
+X	    }
+X	}
+X    } while (p->p_lastm != mctl->mc_current);
+X}
+END_OF_dmessage.c
+if test 1919 -ne `wc -c <dmessage.c`; then
+    echo shar: \"dmessage.c\" unpacked with wrong size!
+fi
+# end of overwriting check
+fi
+if test -f itoa.c -a "${1}" != "-c" ; then
+  echo shar: Will not over-write existing file \"itoa.c\"
+else
+echo shar: Extracting \"itoa.c\" \(341 characters\)
+sed "s/^X//" >itoa.c <<'END_OF_itoa.c'
+Xstatic char sccsid[] = "@(#)itoa.c	3.1";
+Xitoa(n, len, buf)
+Xint n, len;
+Xchar *buf;
+X{
+X  int i;
+X  char sign = ' ';
+X
+X  if (0 > n) {
+X    n = -n;
+X    sign = '-';
+X  }
+X  for (i = len; i > 0; i--) {
+X    if (n > 0 || len == i) {
+X      buf[i-1] = '0' + (n % 10);
+X      n = n / 10;
+X    } else {
+X      buf[i-1] = sign;
+X      sign = ' ';
+X    }
+X  }
+X}
+X
+END_OF_itoa.c
+if test 341 -ne `wc -c <itoa.c`; then
+    echo shar: \"itoa.c\" unpacked with wrong size!
+fi
+# end of overwriting check
+fi
+if test -f main.c -a "${1}" != "-c" ; then
+  echo shar: Will not over-write existing file \"main.c\"
+else
+echo shar: Extracting \"main.c\" \(3799 characters\)
+sed "s/^X//" >main.c <<'END_OF_main.c'
+Xstatic char sccsid[] = "@(#)main.c	3.1";
+X#ifndef lint
+Xstatic char *rcsid_main_c = "$Header: /uraid2/riedl/src/xceltrek/RCS/main.c,v 1.1 88/04/18 16:10:25 riedl Exp Locker: riedl $";
+X#endif	lint
+X/* Copyright (c) 1986 	Chris Guthrie */
+X
+X#include <X11/Xlib.h>
+X#include <stdio.h>
+X#if !defined(cray)
+X#include <sys/types.h>
+X#endif
+X#include <sys/time.h>
+X#include <sys/file.h>
+X#include <signal.h>
+X#include <pwd.h>
+X#include <netdb.h>
+X#include <netinet/in.h>
+X#include <sys/socket.h>
+X
+X#if defined(hpux) || defined(cray)
+X#include <fcntl.h>
+X#endif
+X
+X#ifdef SUN40
+X#include <sys/filio.h>
+X#else
+X#if !defined(cray)
+X# define	FD_SET(n, s)	(((s)->fds_bits[0]) |= (1 << n))
+X# define	FD_CLR(n, s)	(((s)->fds_bits[0]) &= ~(1 << n))
+X# define	FD_ZERO(s)	bzero((char *)(s), sizeof (*(s)))
+X# define	FD_ISSET(n, s)	(((s)->fds_bits[0]) & (1 << n))
+X#endif
+X#include <sys/ioctl.h>
+X#endif /* SUN40 */
+X
+X#include "defs.h"
+X#include "data.h"
+X
+Xextern int debug;
+Xextern int	xtrek_socket;
+Xstruct sockaddr_in	xtrekAddress;
+X
+Xmain(argc, argv)
+Xint argc;
+Xchar **argv;
+X{
+X    struct player	*p;
+X    struct servent	*sp;
+X    extern struct servent	*getservbyname();
+X    int docycle(), move();
+X    char *host;
+X    register int i;
+X    extern char *optarg;
+X    extern int optind, opterr;
+X    char *getenv();
+X    char c;
+X    int argerr = 0;
+X    int	on = 1;
+X    int oldinetd = 0;
+X    long xxxtime;
+X    int	result;
+X    int	started_from_cmdline;
+X
+X    started_from_cmdline = isatty(fileno(stdin));
+X
+X#if !defined(NEWINET)
+X    oldinetd = 1;
+X#endif
+X    while ((c = getopt(argc, argv, "dl:")) != EOF) {
+X      switch (c) {
+X      case 'd':
+X	debug++;
+X	break;
+X      case 'l':
+X	strncpy(DIR, optarg, sizeof (DIR) - 1);
+X	break;
+X      case '?':
+X      default:
+X	argerr = 1;
+X	break;
+X      }
+X    }
+X    if (optind < argc) host = argv[optind];
+X    else host = getenv("DISPLAY");
+X
+X    if (argerr) {
+X	printf("Usage: %s [-d] [-l lib_directory]\n",
+X	       argv[0]);
+X	exit(1);
+X    }
+X
+X    chdir(DIR);
+X
+X    if (!debug) {
+X	    close(fileno(stderr));
+X	    open("stderr.out", O_CREAT|O_RDWR|O_APPEND, 0666);
+X    }
+X    time(&xxxtime);
+X    fprintf(stderr, "in.xtrekd: starting at %s\n", ctime(&xxxtime));
+X
+X    if (debug || oldinetd || started_from_cmdline) {
+X	    if (oldinetd) {
+X#ifdef notdef
+X		    sp = getservbyname("xtrek", "udp");
+X		    if (sp == (struct servent *) NULL) {
+X			fprintf(stderr, "Can't find xtrek udp service\n");
+X			exit(1);
+X		    }
+X#endif
+X		    if (!debug && !started_from_cmdline) {
+X			ioctl(0, FIONBIO, (char *) &on);
+X			(void) setsockopt(0, SOL_SOCKET, SO_KEEPALIVE, (char *)&on, sizeof on);
+X		    }
+X	    }
+X	    sp = getservbyname("xtrek", "tcp");
+X	    xtrekAddress.sin_family = AF_INET;
+X	    xtrekAddress.sin_addr.s_addr = INADDR_ANY;
+X	    xtrekAddress.sin_port = sp ? sp->s_port : DEF_TCP_PORT;
+X
+X	    xtrek_socket = socket(AF_INET, SOCK_STREAM, 0);
+X	    if (xtrek_socket < 0) {
+X		fprintf(stderr, "Can't open xtrek socket\n");
+X		perror("socket");
+X		exit(1);
+X	    }
+X	    if (bind(xtrek_socket, &xtrekAddress, sizeof xtrekAddress) < 0) {
+X		fprintf(stderr, "Can't bind to xtrek address\n");
+X		perror("bind");
+X		(void) close(xtrek_socket);
+X		exit(1);
+X	    }
+X    } else {
+X	    xtrek_socket = 0;
+X    }
+X    (void) setsockopt(xtrek_socket, SOL_SOCKET, SO_REUSEADDR, (char *)&on, sizeof on);
+X    (void) setsockopt(xtrek_socket, SOL_SOCKET, SO_KEEPALIVE, (char *)&on, sizeof on);
+X    ioctl(xtrek_socket, FIONBIO, (char *) &on);
+X
+X    if (listen(xtrek_socket, MAXPLAYER) < 0) {
+X	fprintf(stderr, "Can't listen on xtrek socket\n");
+X	perror("listen");
+X	(void) close(xtrek_socket);
+X	exit(1);
+X    }
+X
+X    /* this finds the shared memory information plus a player slot */
+X    initialize();
+X
+X    /* The main loop monster! */
+X    input();
+X}
+X
+Xdrain_udp_socket() {
+X	register int	cc;
+X	static char	rbuf[25];
+X
+X	while (1) {
+X		if ((cc = recv(0, rbuf, sizeof rbuf, 0)) <= 0)
+X			break;
+X	}
+X}
+END_OF_main.c
+if test 3799 -ne `wc -c <main.c`; then
+    echo shar: \"main.c\" unpacked with wrong size!
+fi
+# end of overwriting check
+fi
+if test -f orbit.c -a "${1}" != "-c" ; then
+  echo shar: Will not over-write existing file \"orbit.c\"
+else
+echo shar: Extracting \"orbit.c\" \(1789 characters\)
+sed "s/^X//" >orbit.c <<'END_OF_orbit.c'
+Xstatic char sccsid[] = "@(#)orbit.c	3.1";
+X
+X/*
+X
+X	Copyright (c) 1986 	Chris Guthrie
+X
+XPermission to use, copy, modify, and distribute this
+Xsoftware and its documentation for any purpose and without
+Xfee is hereby granted, provided that the above copyright
+Xnotice appear in all copies and that both that copyright
+Xnotice and this permission notice appear in supporting
+Xdocumentation.  No representations are made about the
+Xsuitability of this software for any purpose.  It is
+Xprovided "as is" without express or implied warranty.
+X
+X*/
+X
+X#include <X11/Xlib.h>
+X
+X#include <stdio.h>
+X#include <math.h>
+X#if !defined(cray)
+X#include <sys/types.h>
+X#endif
+X#include "defs.h"
+X#include "data.h"
+X
+X/* orbit a planet */
+X
+Xorbit(p)
+Xregister struct player	*p;
+X{
+X    register int i;
+X    register struct planet *l;
+X    unsigned char dir;
+X    int dx, dy;
+X    unsigned char iatan2();
+X
+X    if (!isGod(p) && p->p_ship->s_speed > ORBSPEED) {
+X	warning(p, "Speed must be less than two to orbit");
+X	return;
+X    }
+X    if (p->p_ship->s_flags & SFORBIT) {
+X	warning(p, "You are already orbiting");
+X	return;
+X    }
+X
+X    for (i = 0, l = &planets[0]; i < MAXPLANETS; i++, l++) {
+X	dx = ABS(l->pl_x - p->p_ship->s_x);
+X	dy = ABS(l->pl_y - p->p_ship->s_y);
+X	if (dx > ORBDIST || dy > ORBDIST)		/*XXX*/
+X	    continue;
+X	if (dx * dx + dy * dy > ORBDIST * ORBDIST)
+X	    continue;
+X
+X	dir = iatan2(l->pl_x - p->p_ship->s_x, l->pl_y - p->p_ship->s_y);
+X	l->pl_info |= (1 << p->p_ship->s_team);
+X	p->p_ship->s_dir = dir + 64;
+X	p->p_ship->s_flags |= SFORBIT;
+X	p->p_ship->s_x = l->pl_x + ((ORBDIST * icos[dir]) >> TRIGSCALE);
+X	p->p_ship->s_y = l->pl_y + ((ORBDIST * isin[dir]) >> TRIGSCALE);
+X	p->p_ship->s_speed = p->p_ship->s_desspeed = 0;
+X	p->p_ship->s_planet = l->pl_no;
+X	return;
+X    }
+X
+X    warning(p, "Not close enough to any planet to orbit");
+X}
+END_OF_orbit.c
+if test 1789 -ne `wc -c <orbit.c`; then
+    echo shar: \"orbit.c\" unpacked with wrong size!
+fi
+# end of overwriting check
+fi
+if test -f patchlevel.h -a "${1}" != "-c" ; then
+  echo shar: Will not over-write existing file \"patchlevel.h\"
+else
+echo shar: Extracting \"patchlevel.h\" \(74 characters\)
+sed "s/^X//" >patchlevel.h <<'END_OF_patchlevel.h'
+X/* static char sccsid[] = "@(#)patchlevel.h	3.1"; */
+X#define	PATCHLEVEL	0
+END_OF_patchlevel.h
+if test 74 -ne `wc -c <patchlevel.h`; then
+    echo shar: \"patchlevel.h\" unpacked with wrong size!
+fi
+# end of overwriting check
+fi
+if test -f phaser.c -a "${1}" != "-c" ; then
+  echo shar: Will not over-write existing file \"phaser.c\"
+else
+echo shar: Extracting \"phaser.c\" \(2929 characters\)
+sed "s/^X//" >phaser.c <<'END_OF_phaser.c'
+Xstatic char sccsid[] = "@(#)phaser.c	3.1";
+X
+X/*
+X
+X	Copyright (c) 1986 	Chris Guthrie
+X
+XPermission to use, copy, modify, and distribute this
+Xsoftware and its documentation for any purpose and without
+Xfee is hereby granted, provided that the above copyright
+Xnotice appear in all copies and that both that copyright
+Xnotice and this permission notice appear in supporting
+Xdocumentation.  No representations are made about the
+Xsuitability of this software for any purpose.  It is
+Xprovided "as is" without express or implied warranty.
+X
+X*/
+X
+X#include <X11/Xlib.h>
+X#include <stdio.h>
+X#include <math.h>
+X#include <signal.h>
+X#include "defs.h"
+X#include "data.h"
+X
+Xphaser(p, course)
+Xregister struct player	*p;
+Xunsigned char course;
+X{
+X    register int i;
+X    register struct player *j, *target;
+X    register struct phaser *mine;
+X    unsigned char dir, iatan2();
+X    int range, trange;
+X    char buf[80];
+X
+X    mine = &phasers[p->p_ship->s_no];
+X
+X    if (p->p_ship->s_phaserdamage <= 0) {
+X	warning(p, "You don't have phasers");
+X	return;
+X    }
+X    if (mine->ph_status != PHFREE) {
+X	warning(p, "Phasers have not recharged");
+X	return;
+X    }
+X    if (p->p_ship->s_fuel < p->p_ship->s_phasercost) {
+X	warning(p, "Not enough fuel for phaser");
+X	return;
+X    }
+X    if (!isGod(p) && (p->p_ship->s_flags & SFREPAIR)) {
+X	warning(p, "Can't fire while repairing");
+X	return;
+X    }
+X    if (!isGod(p) && (p->p_ship->s_flags & SFWEP)) {
+X	warning(p, "Weapons overheated");
+X	return;
+X    }
+X    if (!isGod(p) && (p->p_ship->s_flags & SFCLOAK)) {
+X	warning(p, "Cannot fire while cloaked");
+X	return;
+X    }
+X
+X    p->p_ship->s_fuel -= p->p_ship->s_phasercost;
+X    p->p_ship->s_wtemp += p->p_ship->s_phasercost / 10;
+X    target = (struct player *) 0;
+X    mine->ph_dir = course;
+X    for (i = 0, j = &players[i]; i < MAXPLAYER; i++, j++) {
+X	if ((j->p_status != PALIVE) || (j == p))
+X	    continue;
+X	if (isGod(j)) continue;
+X	if ((!((j->p_ship->s_swar | j->p_ship->s_hostile) & (1 << p->p_ship->s_team))) &&
+X	    (!((p->p_ship->s_swar | p->p_ship->s_hostile) & (1 << j->p_ship->s_team))))
+X		continue;
+X	dir = iatan2(j->p_ship->s_x - p->p_ship->s_x, p->p_ship->s_y - j->p_ship->s_y);
+X	if (angdist(dir, course) < 5) {
+X	    trange = (int) hypot((double) (j->p_ship->s_x - p->p_ship->s_x),
+X		(double) (j->p_ship->s_y - p->p_ship->s_y));
+X	    if (target == 0) {
+X		target = j;
+X		range = trange;
+X	    }
+X	    else if (range > trange) {
+X		target = j;
+X		range = trange;
+X	    }
+X	}
+X    }
+X    if ((target == 0) || (range > p->p_ship->s_phasedist)) {
+X	mine->ph_fuse = 10;
+X	mine->ph_status = PHMISS;
+X	warning(p, "Phaser missed!!!");
+X    }
+X    else {
+X	mine->ph_fuse = 10;
+X	mine->ph_target = target->p_ship->s_no;
+X	mine->ph_damage = (p->p_ship->s_phasedist - range) * p->p_ship->s_phaserdamage / p->p_ship->s_phasedist;
+X	mine->ph_status = PHHIT;
+X	(void) sprintf(buf, "Phaser hit %s for %d points",
+X	    target->p_name,
+X	    mine->ph_damage);
+X	warning(p, buf);
+X    }
+X    p->p_ship->s_stats.st_phasers++;
+X}
+END_OF_phaser.c
+if test 2929 -ne `wc -c <phaser.c`; then
+    echo shar: \"phaser.c\" unpacked with wrong size!
+fi
+# end of overwriting check
+fi
+if test -f planetlist.c -a "${1}" != "-c" ; then
+  echo shar: Will not over-write existing file \"planetlist.c\"
+else
+echo shar: Extracting \"planetlist.c\" \(1944 characters\)
+sed "s/^X//" >planetlist.c <<'END_OF_planetlist.c'
+Xstatic char sccsid[] = "@(#)planetlist.c	3.1";
+X
+X/*
+X
+X	Copyright (c) 1986 	Chris Guthrie
+X
+XPermission to use, copy, modify, and distribute this
+Xsoftware and its documentation for any purpose and without
+Xfee is hereby granted, provided that the above copyright
+Xnotice appear in all copies and that both that copyright
+Xnotice and this permission notice appear in supporting
+Xdocumentation.  No representations are made about the
+Xsuitability of this software for any purpose.  It is
+Xprovided "as is" without express or implied warranty.
+X
+X*/
+X
+X
+X#include <X11/Xlib.h>
+X#include <stdio.h>
+X#include "defs.h"
+X#include "data.h"
+X
+Xstatic char *teamname[8] = {
+X    "XXX",
+X    "FED",
+X    "ROM",
+X    "KLI",
+X    "ORI",
+X    "IND",
+X    "NOT",
+X    "GOD"
+X};
+X
+X/*
+X** Open a window which contains all the planets and their current
+X** statistics.  Players will not know about planets that their team
+X** has not orbited.
+X*/
+X
+Xplanetlist(p)
+Xregister struct player	*p;
+X{
+X    register int i;
+X    register int k = 0;
+X    char buf[BUFSIZ];
+X    char buf2[BUFSIZ];
+X    register struct planet *j;
+X
+X    (void) sprintf(buf, "  # Planet Name      own armies type");
+X    if (isGod(p))
+X	strcat(buf, "   OVel  OAng  SOAng");
+X    XDrawImageString(p->display, p->planetw, p->dfgc, 0, p->dfont->ascent, buf,
+X       strlen(buf));
+X    k = 2;
+X    for (i = 0, j = &planets[0]; i < MAXPLANETS; i++, j++) {
+X	if (j->pl_flags & PLINVIS)
+X		continue;
+X	if (j->pl_info & (1 << p->p_ship->s_team)) {
+X	    (void) sprintf(buf, " %2d %-16s %3s %3d    %6s",
+X		j->pl_no,
+X		j->pl_name,
+X		teamname[j->pl_owner],
+X		j->pl_owner <= SELFRULED ? j->pl_armies : 0,
+X		j->pl_tname);
+X	}
+X	else {
+X	    (void) sprintf(buf, " %2d %-16s",
+X		j->pl_no,
+X		j->pl_name);
+X	}
+X	if (isGod(p)) {
+X	    sprintf(buf2, " %3d    %3d   %d", j->pl_orbvel, j->pl_orbang, j->pl_suborbang);
+X	    strcat(buf, buf2);
+X	}
+X	XDrawImageString(p->display, p->planetw, p->dfgc, 0, p->dfont->ascent + fontHeight(p->dfont) * k++, buf, strlen(buf));
+X    }
+X}
+END_OF_planetlist.c
+if test 1944 -ne `wc -c <planetlist.c`; then
+    echo shar: \"planetlist.c\" unpacked with wrong size!
+fi
+# end of overwriting check
+fi
+if test -f playerlist.c -a "${1}" != "-c" ; then
+  echo shar: Will not over-write existing file \"playerlist.c\"
+else
+echo shar: Extracting \"playerlist.c\" \(1638 characters\)
+sed "s/^X//" >playerlist.c <<'END_OF_playerlist.c'
+Xstatic char sccsid[] = "@(#)playerlist.c	3.1";
+X
+X/*
+X
+X	Copyright (c) 1986 	Chris Guthrie
+X
+XPermission to use, copy, modify, and distribute this
+Xsoftware and its documentation for any purpose and without
+Xfee is hereby granted, provided that the above copyright
+Xnotice appear in all copies and that both that copyright
+Xnotice and this permission notice appear in supporting
+Xdocumentation.  No representations are made about the
+Xsuitability of this software for any purpose.  It is
+Xprovided "as is" without express or implied warranty.
+X
+X*/
+X
+X#include <X11/Xlib.h>
+X#include <stdio.h>
+X#include "defs.h"
+X#include "data.h"
+X
+Xplayerlist(p, fid)
+Xregister struct player	*p;
+Xint				fid;
+X{
+X    register int i;
+X    register int k = 0;
+X    char buf[BUFSIZ];
+X    register struct player *j;
+X
+X    (void) sprintf(buf, " # Ship Name             Login    Display          dir spd kills");
+X    if (p) {
+X	XDrawImageString(p->display, p->playerw, p->dfgc, 0, p->dfont->ascent, buf, strlen(buf));
+X	k = 2;
+X    } else {
+X	write(fid, buf, strlen(buf));
+X	write(fid, "\n", 1);
+X    }
+X
+X    for (i = 0, j = &players[0]; i < MAXPLAYER; i++, j++) {
+X	if (j->p_status != PALIVE)
+X	    continue;
+X	(void) sprintf(buf, " %1x (%1c%1x) %-16.16s %-8s %-16.16s %3d %3d %5.2f",
+X	    j->p_no,
+X	    teamlet[j->p_ship->s_team],
+X	    j->p_ship->s_no,
+X	    j->p_name,
+X	    j->p_login,
+X	    j->p_monitor,
+X	    j->p_ship->s_dir,
+X	    j->p_ship->s_speed,
+X	    j->p_ship->s_stats.st_kills);
+X	if (p) {
+X		XDrawImageString(p->display, p->playerw, p->dfgc, 0, p->dfont->ascent + fontHeight(p->dfont) * k++, buf, strlen(buf));
+X	} else {
+X		write(fid, buf, strlen(buf));
+X		write(fid, "\n", 1);
+X	}
+X    }
+X}
+END_OF_playerlist.c
+if test 1638 -ne `wc -c <playerlist.c`; then
+    echo shar: \"playerlist.c\" unpacked with wrong size!
+fi
+# end of overwriting check
+fi
+if test -f random.c -a "${1}" != "-c" ; then
+  echo shar: Will not over-write existing file \"random.c\"
+else
+echo shar: Extracting \"random.c\" \(482 characters\)
+sed "s/^X//" >random.c <<'END_OF_random.c'
+Xstatic char sccsid[] = "@(#)random.c	3.1";
+X/*
+X * The really nice random number generator that came with 4.3 uses
+X * too much state information to pass across the network so for our
+X * network-wide random generator we just use the old srand/rand
+X * combination.  Sorry about the false naming.
+X */
+X
+Xstatic long randx = 1;
+X
+Xsrandom(seed)
+Xint seed;
+X{
+X  randx = seed;
+X}
+X
+Xlong random()
+X{
+X  return((randx = randx * 1103515245 + 12345) & 0x7fffffff);
+X}
+X
+Xlong grandom()
+X{
+X  return(randx);
+X}
+END_OF_random.c
+if test 482 -ne `wc -c <random.c`; then
+    echo shar: \"random.c\" unpacked with wrong size!
+fi
+# end of overwriting check
+fi
+if test -f scores.c -a "${1}" != "-c" ; then
+  echo shar: Will not over-write existing file \"scores.c\"
+else
+echo shar: Extracting \"scores.c\" \(2035 characters\)
+sed "s/^X//" >scores.c <<'END_OF_scores.c'
+Xstatic char sccsid[] = "@(#)scores.c	3.1";
+X
+X/*
+X
+X	Copyright (c) 1986 	Chris Guthrie
+X
+XPermission to use, copy, modify, and distribute this
+Xsoftware and its documentation for any purpose and without
+Xfee is hereby granted, provided that the above copyright
+Xnotice appear in all copies and that both that copyright
+Xnotice and this permission notice appear in supporting
+Xdocumentation.  No representations are made about the
+Xsuitability of this software for any purpose.  It is
+Xprovided "as is" without express or implied warranty.
+X
+X*/
+X
+X#ifdef hpux
+X#include <fcntl.h>
+X#endif
+X
+X#include <stdio.h>
+X#include <sys/types.h>
+X#include <sys/file.h>
+X#include <X11/X.h>
+X#include <X11/Xlib.h>
+X#include "defs.h"
+X#include <ndbm.h>
+X
+X
+Xvoid
+Xlistscores(fid)
+Xint	fid;
+X{
+X    DBM		*sdb;
+X    datum	key, sinfo;
+X    char	buf[BUFSIZE];
+X    struct stats old;
+X
+X    sdb = dbm_open(SCOREFILE, O_RDONLY, 0700);
+X    if (sdb == (DBM *) NULL) {
+X	strcpy(buf, "listscores: Can't open SCOREFILE\n", strlen(buf));
+X	write(fid, buf, strlen(buf));
+X	return;
+X    }
+X
+X  /*         0123456789012345678901234567890123456789012345678901234567890*/
+Xstrcpy(buf, "Name                     rtime     kills  maxkills  losses\n");
+X	write(fid, buf, strlen(buf));
+Xstrcpy(buf, "entries conqs coups   torps phasers  abomb aship planets gens ratio\n\n");
+X	write(fid, buf, strlen(buf));
+X
+X    key = dbm_firstkey(sdb);
+X	while (key.dptr) {
+X		sinfo = dbm_fetch(sdb, key);
+X		bcopy(sinfo.dptr, &old, sizeof (struct stats));
+X		if (old.st_entries > 0) {
+Xsprintf(buf, "%-24s %8d %6.2f  %6.2f  %5d\n",
+X			key.dptr,
+X			old.st_time,
+X			old.st_kills,
+X			old.st_maxkills,
+X			old.st_losses);
+Xwrite(fid, buf, strlen(buf));
+Xsprintf(buf, "%7d %5d %5d %7d %7d %6d %5d %7d %4d %5.3f\n",
+X			old.st_entries,
+X			old.st_conqs,
+X			old.st_coups,
+X			old.st_torps,
+X			old.st_phasers,
+X			old.st_armsbomb,
+X			old.st_armsship,
+X			old.st_planets,
+X			old.st_genocides,
+X			(old.st_losses ? old.st_kills / old.st_losses : (old.st_kills * 2.0)));
+Xwrite(fid, buf, strlen(buf));
+Xwrite(fid, "\n", 1);
+X		}
+X		key = dbm_nextkey(sdb);
+X    }
+X}
+END_OF_scores.c
+if test 2035 -ne `wc -c <scores.c`; then
+    echo shar: \"scores.c\" unpacked with wrong size!
+fi
+# end of overwriting check
+fi
+if test -f torp.c -a "${1}" != "-c" ; then
+  echo shar: Will not over-write existing file \"torp.c\"
+else
+echo shar: Extracting \"torp.c\" \(1980 characters\)
+sed "s/^X//" >torp.c <<'END_OF_torp.c'
+Xstatic char sccsid[] = "@(#)torp.c	3.1";
+X#ifndef lint
+Xstatic char *rcsid_torp_c = "$Header: /uraid2/riedl/src/xceltrek/RCS/torp.c,v 1.1 88/04/18 16:10:50 riedl Exp Locker: riedl $";
+X#endif	lint
+X/* Copyright (c) 1986 	Chris Guthrie */
+X
+X#include <X11/Xlib.h>
+X#include <stdio.h>
+X#if !defined(cray)
+X#include <sys/types.h>
+X#endif
+X#include "defs.h"
+X#include "data.h"
+Xextern long isin[], icos[];
+X
+X/* Launch torp */
+X
+Xntorp(p, course, type)
+Xregister struct player	*p;
+Xunsigned char course;
+Xint type;
+X{
+X    register int i, x, y;
+X    register struct torp *k;
+X    char buf[50];
+X    double sqrt();
+X
+X    if (p->p_ship->s_ntorp >= MAXTORP) {
+X        sprintf(buf, "Torps limited to %d", MAXTORP);
+X	warning(p, buf);
+X	return;
+X    }
+X    if (p->p_ship->s_fuel < p->p_ship->s_torpcost) {
+X	warning(p, "Not enough fuel for torp");
+X	return;
+X    }
+X    if (!isGod(p) && (p->p_ship->s_flags & SFREPAIR)) {
+X	warning(p, "Can't fire while repairing");
+X	return;
+X    }
+X    if (!isGod(p) && (p->p_ship->s_flags & SFWEP)) {
+X	warning(p, "Weapons overheated");
+X	return;
+X    }
+X    if (!isGod(p) && (p->p_ship->s_flags & SFCLOAK)) {
+X	warning(p, "Cannot fire while cloaked");
+X	return;
+X    }
+X    p->p_ship->s_ntorp++;
+X    p->p_ship->s_fuel -= p->p_ship->s_torpcost;
+X    p->p_ship->s_wtemp += p->p_ship->s_torpcost / 10;
+X    for (i = MAXTORP, k = &torps[p->p_ship->s_no * MAXTORP]; i > 0; i--, k++) {
+X        if (k->t_status == TFREE)
+X	    break;
+X    }
+X    if (i == 0) {
+X      fprintf(stderr, "ntorp: sanity check failed - no torp to fire\n");
+X      p->p_ship->s_ntorp--;
+X      return;
+X    }
+X    k->t_no = MAXTORP - i;
+X    k->t_status = type;
+X    k->t_owner = p->p_ship->s_no;
+X    k->t_team = p->p_ship->s_team;
+X    k->t_x = p->p_ship->s_x;
+X    k->t_y = p->p_ship->s_y;
+X    k->t_dir = course;
+X    k->t_damage = p->p_ship->s_torpdamage;
+X    k->t_speed = p->p_ship->s_torpspeed;
+X    k->t_war = p->p_ship->s_hostile | p->p_ship->s_swar;
+X    k->t_fuse = (random() % TFIREVAR) + TFIREMIN;
+X    p->p_ship->s_stats.st_torps++;
+X}
+END_OF_torp.c
+if test 1980 -ne `wc -c <torp.c`; then
+    echo shar: \"torp.c\" unpacked with wrong size!
+fi
+# end of overwriting check
+fi
+if test -f util.c -a "${1}" != "-c" ; then
+  echo shar: Will not over-write existing file \"util.c\"
+else
+echo shar: Extracting \"util.c\" \(3641 characters\)
+sed "s/^X//" >util.c <<'END_OF_util.c'
+Xstatic char sccsid[] = "@(#)util.c	3.1";
+X
+X/*
+X
+X	Copyright (c) 1986 	Chris Guthrie
+X
+XPermission to use, copy, modify, and distribute this
+Xsoftware and its documentation for any purpose and without
+Xfee is hereby granted, provided that the above copyright
+Xnotice appear in all copies and that both that copyright
+Xnotice and this permission notice appear in supporting
+Xdocumentation.  No representations are made about the
+Xsuitability of this software for any purpose.  It is
+Xprovided "as is" without express or implied warranty.
+X
+X*/
+X
+X#include <X11/Xlib.h>
+X#include <stdio.h>
+X#include <math.h>
+X#include <signal.h>
+X#include "defs.h"
+X#include "data.h"
+X
+X/*
+X** Provide the angular distance between two angles.
+X*/
+Xangdist(x, y)
+Xunsigned char x, y;
+X{
+X    register unsigned char res;
+X
+X    res = ABS(x - y);
+X    if (res > 128)
+X	return(256 - (int) res);
+X    return((int) res);
+X}
+X
+X/*
+X** Find the object nearest mouse.  Returns a pointer to an
+X** obtype structure.  This is used for info, locking on, and towing.
+X**
+X** Because we are never interested in it, this function will
+X** never return your own ship as the target.
+X**
+X** Finally, this only works on the two main windows
+X*/
+X
+Xstatic struct obtype _target;
+X
+Xstruct obtype *
+Xgettarget(p, ww, x, y, targtype)
+Xregister struct player	*p;
+XWindow ww;
+Xint x, y;
+Xint targtype;
+X{
+X    register int i;
+X    register struct player *j;
+X    register struct planet *k;
+X    int	g_x, g_y;
+X    double dist, closedist;
+X
+X    if (ww == p->mapw) {
+X	g_x = x * GWIDTH / p->p_xwinsize;
+X	g_y = y * GWIDTH / p->p_ywinsize;
+X    }
+X    else {
+X	g_x = p->p_ship->s_x + ((x - p->p_xwinsize/2) * SCALE);
+X	g_y = p->p_ship->s_y + ((y - p->p_ywinsize/2) * SCALE);
+X    }
+X    closedist = GWIDTH;
+X
+X    if (targtype & TARG_PLANET) {
+X	for (i = 0, k = &planets[0]; i < MAXPLANETS; i++, k++) {
+X	    if (!isGod(p) && (k->pl_flags & PLINVIS))
+X		continue;
+X	    dist = hypot((double) (g_x - k->pl_x), (double) (g_y - k->pl_y));
+X	    if (dist < closedist) {
+X		_target.o_type = PLANETTYPE;
+X		_target.o_num = i;
+X		_target.o_dist = dist;
+X		closedist = dist;
+X	    }
+X
+X	}
+X    }
+X
+X    if (targtype & TARG_PLAYER) {
+X	for (i = 0, j = &players[i]; i < MAXPLAYER; i++, j++) {
+X	    if (j->p_status != PALIVE)
+X		continue;
+X	    if (!isGod(p) &&
+X	        ((j->p_ship->s_flags & SFCLOAK) && (!(j->p_ship->s_flags & SFDCLOAK))) &&
+X	        (!(targtype & TARG_CLOAK)))
+X		continue;
+X	    if (j == p && (targtype & TARG_MYSELF) == 0)
+X		continue;
+X	    dist = hypot((double) (g_x - j->p_ship->s_x), (double) (g_y - j->p_ship->s_y));
+X	    if (dist < closedist) {
+X		_target.o_type = PLAYERTYPE;
+X		_target.o_num = i;
+X		_target.o_dist = dist;
+X		closedist = dist;
+X	    }
+X	}
+X    }
+X
+X    if (closedist == GWIDTH) {		/* Didn't get one.  bad news */
+X	_target.o_type = PLAYERTYPE;
+X	_target.o_num = p->p_ship->s_no;	/* Return myself.  Oh well... */
+X	_target.o_dist = 0;
+X	return(&_target);
+X    }
+X    else {
+X	return(&_target);
+X    }
+X}
+X
+Xiscloaked(s)
+Xregister struct ship	*s;
+X{
+X	return ((s->s_flags & SFCLOAK) && (!(s->s_flags & SFDCLOAK)));
+X}
+X
+X/*
+X** Tell us if a window is currently visible on the screen
+X*/
+X
+Xismapped(p, win)
+Xregister struct player	*p;
+XWindow win;
+X{
+X    XWindowAttributes info;
+X
+X    XGetWindowAttributes(p->display, win, &info);
+X
+X    return (info.map_state == IsViewable);
+X}
+X
+X#ifdef hpux
+X#include <sys/signal.h>
+X
+Xvoid (*
+Xsignal(sig, funct))()
+Xint sig;
+Xint (*funct)();
+X{
+X    struct sigvec vec;
+X
+X/*
+X *  jas (Jeff Schmidt) Nuke this.  'vec.sv_flags' gets set to SV_RESETHAND
+X *  when the following is invoked on the HP 9000/300.
+X
+X    sigvector(sig, 0, &vec);
+X */
+X    vec.sv_handler = funct;
+X    vec.sv_flags = 0L;
+X    sigvector(sig, &vec, (struct sigvec *) 0);
+X}
+X#endif hpux
+END_OF_util.c
+if test 3641 -ne `wc -c <util.c`; then
+    echo shar: \"util.c\" unpacked with wrong size!
+fi
+# end of overwriting check
+fi
+if test -f warning.c -a "${1}" != "-c" ; then
+  echo shar: Will not over-write existing file \"warning.c\"
+else
+echo shar: Extracting \"warning.c\" \(1443 characters\)
+sed "s/^X//" >warning.c <<'END_OF_warning.c'
+Xstatic char sccsid[] = "@(#)warning.c	3.1";
+X/*
+X
+X	Copyright (c) 1986 	Chris Guthrie
+X
+XPermission to use, copy, modify, and distribute this
+Xsoftware and its documentation for any purpose and without
+Xfee is hereby granted, provided that the above copyright
+Xnotice appear in all copies and that both that copyright
+Xnotice and this permission notice appear in supporting
+Xdocumentation.  No representations are made about the
+Xsuitability of this software for any purpose.  It is
+Xprovided "as is" without express or implied warranty.
+X
+X*/
+X
+X
+X#include <X11/Xlib.h>
+X#include <stdio.h>
+X#include <math.h>
+X#include <signal.h>
+X#include "defs.h"
+X#include "data.h"
+X
+X/*
+X** The warning in text will be printed in the warning window.
+X*/
+Xwarning(p, text)
+Xregister struct player	*p;
+Xregister char		*text;
+X{
+X    register struct player	*co;
+X    register int		i;
+X
+X    if (p->p_flags & PFROBOT)
+X	return;
+X
+X    for (i = 0, co = &players[0]; i < MAXPLAYER; i++, co++) {
+X	if (co->p_status != PALIVE || co->p_ship != p->p_ship)
+X		continue;
+X	if (co->p_flags & PFROBOT)
+X		continue;
+X	co->p_warntimer = udcounter + WARNTIME;  /* WARNTIME updates later the line will be cleared */
+X	if (co->p_warncount > 0)
+X		XFillRectangle(co->display, co->warnw, co->cleargc,
+X			5, 5, co->p_warncount, fontHeight(co->dfont));
+X	XDrawImageString(co->display, co->warnw, co->dfgc,
+X		5, 5 + co->dfont->ascent, text, strlen(text));
+X	p->p_warncount = XTextWidth(p->dfont, text, strlen(text));
+X    }
+X}
+END_OF_warning.c
+if test 1443 -ne `wc -c <warning.c`; then
+    echo shar: \"warning.c\" unpacked with wrong size!
+fi
+# end of overwriting check
+fi
+if test -f xtrek.man -a "${1}" != "-c" ; then
+  echo shar: Will not over-write existing file \"xtrek.man\"
+else
+echo shar: Extracting \"xtrek.man\" \(2282 characters\)
+sed "s/^X//" >xtrek.man <<'END_OF_xtrek.man'
+X.\"static char sccsid[] = "@(#)xtrek.man	3.1";
+X.TH XTREK 6 "08 Mar 1989"
+X.SH NAME
+Xxtrek \- X based multi-player space shoot 'em up game
+X.SH SYNOPSIS
+X.B
+Xxtrek
+X[
+X\-s
+X.BI xtrek-server-machine
+X] [
+X\-d
+X.BI display
+X] [
+X\-q
+X] [
+X\-c
+X.BI ship-number
+X] [
+X\-n
+X.BI ship-name
+X] [
+X\-S
+X] [
+X\-P
+X] [
+X\-R
+X]
+X.SH DESCRIPTION
+X.I Xtrek
+Xis a game based on the X window environment.
+XIt is thoroughly described in xtrek.doc which probably lives
+Xin /usr/games/lib/xtrek/xtrek.doc.
+X.SH OPTIONS
+X.TP
+X.B \-s
+XUse "xtrek-server-machine" as the machine to connect to.
+XIf not specified,
+X.B xtrek
+Xwill first try to use the XTREKSERVER
+Xenvironment variable, and failing that will use the name "xtrek-server".
+X.TP
+X.B \-d
+XCreate the connection from the server machine to the specified display.
+XIf not specified,
+X.B xtrek
+Xwill use the DISPLAY environment variable.
+XThe display "unix:0.0" (a default) will not work unless the xtrek daemon
+Xis running on a node with a display.
+X.TP
+X.B \-q
+XThis queries the xtrek-server to find out how many players and robots
+Xthere are.
+XIf the output is a tty, the results will be printed.
+XIf not, the return value is encoded using the following values added
+Xtogether:
+X.in +2
+X1000 - Federation players are in the game
+X.br
+X100 - Romulan players are in the game
+X.br
+X10 - Klingon players are in the game
+X.br
+X1 - Orion players are in the game
+X.in -2
+X.TP
+X.B \-c
+XBecome a copilot of ship "ship-number".
+X.TP
+X.B \-n
+XUse "ship-name" as a name of a ship to search for in your resource
+Xdatabase.
+XThe string returned is used to modify your ship characteristics.
+XSee
+X.B
+Xxtrek_ship (6)
+Xfor more information about ship characteristics.
+X.TP
+X.B \-S
+XList the scores database to stdout.
+XThis prints all the scores that have been entered in the scores database.
+X.TP
+X.B \-R
+XList the "running" scores to stdout.
+XThis prints the scores of all the people who have entered the game
+Xduring it's present incarnation.
+X.TP
+X.B \-P
+XList the players who are presently in the game.
+X.SH "SEE ALSO"
+X.BR xtrek_ship (6)
+X.BR xtrekb (6)
+X.SH AUTHOR
+X.TP
+XChris Guthrie (chris at ic.berkeley.edu)
+X.SH CONTRIBUTORS
+X.PD 0
+X.TP
+XDan Dickey (ddickey at cray.com)
+X.TP
+XMatt Burdick (burdick%hpda at hplabs.hp.com)
+X.TP
+XJeff Schmidt (jas%hpda at hplabs.hp.com)
+X.TP
+XHal Peterson (hrp at cray.com)
+X.PD
+X.SH BUGS
+X"Captain, the probability factor approaches 1.0".
+END_OF_xtrek.man
+if test 2282 -ne `wc -c <xtrek.man`; then
+    echo shar: \"xtrek.man\" unpacked with wrong size!
+fi
+# end of overwriting check
+fi
+if test -f xtrekb.man -a "${1}" != "-c" ; then
+  echo shar: Will not over-write existing file \"xtrekb.man\"
+else
+echo shar: Extracting \"xtrekb.man\" \(2551 characters\)
+sed "s/^X//" >xtrekb.man <<'END_OF_xtrekb.man'
+X.TH XTREKB 1 "8 August 1989" "X Version 11"
+X.SH NAME
+Xxtrekb - xtrek biff program
+X.SH SYNOPSIS
+X.B xtrekb
+X[-option ...]
+X.SH DESCRIPTION
+XThe
+X.I xtrekb
+Xprogram displays outlines of the four ship types used in the
+X.I xtrek(6)
+Xgame.
+XWhen there are no active players for the given team, the ship points
+Xdown; when there is at least one player on the team, the ship points
+Xup.
+X.SH OPTIONS
+X.I Xtrekb
+Xaccepts the
+Xoptions listed below:
+X.TP 8
+X.B \-help
+XThis option indicates that a brief summary of the allowed options should be
+Xprinted on the standard error output.
+X.TP 8
+X.B \-update \fIseconds\fP
+XThis option specifies the frequency in seconds at which \fIxtrekb\fP
+Xshould update its display.
+X.TP 8
+X.B \-bg \fIcolor\fP
+XThis option specifies the color to use for the background of the window.
+XThe default is ``black.''
+X.TP 8
+X.B \-fg \fIcolor\fP
+XThis option specifies the color to use for the foreground of the window.
+XThe default is ``white.''
+XThis only applies to monochrome screens.
+XOn color screens, the ships are the colors of the various teams.
+X.TP 8
+X.B \-rv
+XThis option indicates that reverse video should be simulated by swapping
+Xthe foreground and background colors.
+XOn all screens, the background becomes ``white'', and on
+Xmonochrome screens the
+Xforeground ``black''.
+X.TP 8
+X.B \-geometry \fIgeometry\fP
+XThis option specifies the prefered size and position of the \fIxtrekb\fP window;
+Xsee \fIX(1)\fP.
+X.TP 8
+X.B \-display \fIdisplay\fP
+XThis option specifies the X server to contact; see \fIX(1)\fP.
+X.TP 8
+X.B \-server \fIxtrek-server\fP
+XThis option specifies the machine to contact the main xtrek server program on.
+XIt defaults to the environment variable ``XTREKSERVER'' if set, otherwise
+Xthe value ``xtrek-server''.
+X.SH X DEFAULTS
+X.PP
+X.TP 8
+X.B update (\fPclass\fB Interval)
+XSpecifies the frequency in seconds at which the Xtrek game should be checked.
+X.TP 8
+X.B reverseVideo (\fPclass\fB ReverseVideo)
+XSpecifies that the foreground and background should be reversed.
+X.TP 8
+X.B server (\fPclass\fB Server)
+XSpecifies the machine where the main xtrek server is running.
+X.SH ENVIRONMENT
+X.PP
+X.TP 8
+X.B DISPLAY
+Xto get the default host and display number.
+X.TP 8
+X.B XTREKSERVER
+Xto get the name of the host running the Xtrek game.
+X.SH "SEE ALSO"
+XX(1),
+Xxrdb(1),
+Xxtrek(6),
+Xstat(2)
+X.SH COPYRIGHT
+XCopyright 1988, Massachusetts Institute of Technology.
+X.br
+XSee \fIX(1)\fP for a full statement of rights and permissions.
+X.SH AUTHORS
+XDan Dickey
+X.br
+XJeff Clark, Honeywell SRC (original widget based xtrekb)
+X.br
+XJim Fulton, MIT X Consortium (original Athena/Mailbox widget)
+END_OF_xtrekb.man
+if test 2551 -ne `wc -c <xtrekb.man`; then
+    echo shar: \"xtrekb.man\" unpacked with wrong size!
+fi
+# end of overwriting check
+fi
+if test -f xtrekfont.h -a "${1}" != "-c" ; then
+  echo shar: Will not over-write existing file \"xtrekfont.h\"
+else
+echo shar: Extracting \"xtrekfont.h\" \(672 characters\)
+sed "s/^X//" >xtrekfont.h <<'END_OF_xtrekfont.h'
+X/* static char sccsid[] = "@(#)xtrekfont.h	3.1"; */
+X/*
+X * Definitions of character offsets within the XTrek font.
+X */
+X
+X/*
+X * $Header: /blackbird/home/jeff/TAPE2/xtrek.new/RCS/xtrekfont.h,v 3.1 88/09/20 00:45:48 jeff Exp $
+X */
+X
+X#define FED_GLYPHS	0
+X#define ROM_GLYPHS	16
+X#define KLI_GLYPHS	32
+X#define ORI_GLYPHS	48
+X#define EXP_GLYPHS_LEFT	64
+X#define EXP_GLYPHS_RIGHT	69
+X#define CLOUD_GLYPH	74
+X#define ETORP_GLYPH	75
+X#define MTORP_GLYPH	76
+X#define PLANET_GLYPHS	77
+X#define	SUN_GLYPH	85
+X#define	MOON_GLYPH	86
+X#define MPLANET_GLYPHS	87
+X#define	MSUN_GLYPH	95
+X#define	MMOON_GLYPH	96
+X#define SHIELD_GLYPH	97
+X#define YSHIELD_GLYPH	98
+X#define RSHIELD_GLYPH	99
+X#define	GODVIEW		100
+END_OF_xtrekfont.h
+if test 672 -ne `wc -c <xtrekfont.h`; then
+    echo shar: \"xtrekfont.h\" unpacked with wrong size!
+fi
+# end of overwriting check
+fi
+echo shar: End of archive 1 \(of 11\).
+cp /dev/null ark1isdone
+MISSING=""
+for I in 1 2 3 4 5 6 7 8 9 10 11 ; do
+    if test ! -f ark${I}isdone ; then
+	MISSING="${MISSING} ${I}"
+    fi
+done
+if test "${MISSING}" = "" ; then
+    echo You have unpacked all 11 archives.
+    rm -f ark[1-9]isdone ark[1-9][0-9]isdone
+else
+    echo You still need to unpack the following archives:
+    echo "        " ${MISSING}
+fi
+##  End of shell archive.
+exit 0

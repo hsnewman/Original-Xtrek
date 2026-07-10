@@ -1,0 +1,1671 @@
+#! /bin/sh
+# This is a shell archive.  Remove anything before this line, then unpack
+# it by saving it into a file and typing "sh file".  To overwrite existing
+# If this archive is complete, you will see the following message at the end:
+#		"End of archive 3 (of 11)."
+#
+# Contents:
+#   Imakefile defs.h pstats.c smessage.c stats.c war.c xtrek.c
+#
+# Wrapped by ddickey at cray.com on Thu Oct 11 11:43:52 1990
+#
+PATH=/bin:/usr/bin:/usr/ucb ; export PATH
+if test -f Imakefile -a "${1}" != "-c" ; then
+  echo shar: Will not over-write existing file \"Imakefile\"
+else
+echo shar: Extracting \"Imakefile\" \(6420 characters\)
+sed "s/^X//" >Imakefile <<'END_OF_Imakefile'
+X/* XTREK Imakefile sccsid = "@(#)Imakefile	3.1" */
+X
+X#ifdef BandAidCompiler
+X#include BandAidCompiler
+X#endif
+X
+X/*
+X * User Selectable options:
+X *
+X *  -DCUSTOMSHIP - allows players to customize their ships as described in
+X *		  xtrek_ship(6).  If not defined, then ships are static.
+X *
+X *  -DNO_INETD - This is useful if you are using it as a long-lived daemon
+X *		  rather than running under inetd, which you probably want
+X *		  to do if you are not root.  Be sure to add the line
+X *			#define NO_INETD
+X *		  in addition to adding -DNO_INETD to the options list; the
+X *		  Makefile must change along with the source.
+X *  -DEXCLUDE - Don't allow more than one session per display.
+X *  -DOPENWINDOWS - Define for Suns running open windows.  Will install
+X *		fonts correctly.
+X */
+X/*#define OPTIONS -DCUSTOMSHIP -DNO_INETD*/
+X#define OPTIONS -DCUSTOMSHIP -DEXCLUDE
+X/*#define NO_INETD*/
+X
+X/* Default defines */
+X#define NEWINET /* as nothing */
+X#define SUNV    /* as nothing */
+X#define LOC_CF	/* as nothing */
+X#define LOC_LIB /* as nothing */
+X#define	HPCFLAGS	/* as nothing */
+X#define	OPENWINDOWS	/* as nothing */
+X
+X#if defined(SunArchitecture) && SunOSPlatform && OSMajorVersion >= 4
+X#undef  NEWINET
+X#define NEWINET -DNEWINET
+X#undef  SUNV
+X#define SUNV    -DSUN40
+X#undef LOC_LIB
+X#define	LOC_LIB	-ldbm -Bstatic
+X#undef LOC_CF
+X#define	LOC_CF	-DNDBM
+X#undef OPENWINDOWS
+X#define	OPENWINDOWS	-DOPENWINDOWS
+X#endif
+X
+X#if defined(SGIArchitecture)
+X#define NEWINET -DNEWINET
+X#define LOC_CF  -I/usr/include/bsd
+X#define LOC_LIB -lsun -lbsd
+X#endif
+X
+X#if defined(HPArchitecture)
+X#undef LOC_LIB
+X#define LOC_LIB -lBSD -lndbm
+X#define LOC_LIB -lBSD -lndbm
+X#undef HPCFLAGS
+X#define HPCFLAGS -Dhpux -DSYSV -Wc,-Np500		/* For HP9000/300 */
+X/*#define HPCFLAGS -Dhpux -DSYSV 			/* For HP9000/800 */
+X/*#define XLIB kludge.libX11.a		/* For s800, kludge.libX11.a is linked in */
+X#endif
+X
+X/* What's the daemon going to be called? */
+X#ifdef NO_INETD
+X       XTREKD = xtrekd
+X#else
+X       XTREKD = in.xtrekd
+X#endif
+X     XTREKDIR = /usr/lib/X11/xtrek
+X      DEFINES = NEWINET SUNV OPTIONS LOC_CF HPCFLAGS
+X     LOCALINC = bitmaps.h data.h defs.h planets.h struct.h xtrekfont.h \
+X                clock.bitmap
+X        SRCS1 = bitmaps.c colors.c coup.c data.c death.c detonate.c dmessage.c \
+X                enter.c getship.c inform.c input.c interface.c main.c \
+X                newwin.c orbit.c phaser.c planetlist.c playerlist.c \
+X                pstats.c redraw.c smessage.c subdaemon.c stats.c torp.c \
+X                util.c warning.c random.c rmove.c scorelist.c \
+X                trigtab.c itoa.c minisubs.c war.c DBG.c
+X        OBJS1 = bitmaps.o colors.o coup.o data.o death.o detonate.o dmessage.o \
+X                enter.o getship.o inform.o input.o interface.o main.o \
+X                newwin.o orbit.o phaser.o planetlist.o playerlist.o \
+X                pstats.o redraw.o smessage.o subdaemon.o stats.o torp.o \
+X                util.o warning.o random.o rmove.o scorelist.o \
+X                trigtab.o itoa.o minisubs.o war.o DBG.o
+X    LINTFILES = bitmaps.ln colors.ln coup.ln data.ln death.ln detonate.ln \
+X                dmessage.ln enter.ln getship.ln inform.ln input.ln \
+X                interface.ln main.ln newwin.ln orbit.ln phaser.ln \
+X                planetlist.ln playerlist.ln pstats.ln redraw.ln smessage.ln \
+X                subdaemon.ln stats.ln torp.ln util.ln warning.ln random.ln \
+X                rmove.ln scorelist.ln trigtab.ln itoa.ln minisubs.ln \
+X                war.ln DBG.ln
+X        SRCS2 = xtrek.c
+X        OBJS2 = xtrek.o
+X        SRCS3 = xtrekb.c
+X        OBJS3 = xtrekb.o
+X         SRCS = $(SRCS1) $(SRCS2) $(SRCS3)
+X        SRCSF = xtrek.bdf
+X        OBJSF = xtrek.snf
+X         OBJS = $(OBJSF)
+X     PROGRAMS = bitmaps.h xtrek $(XTREKD) xtrekb
+X     INCLUDES = -I$(TOP)
+X     LINTOPTS = -iabchu
+X         LIBS = LOC_LIB $(XLIB) -lm
+X           FC = bdftosnf
+X
+X.SUFFIXES: .ln
+X
+XAllTarget($(PROGRAMS))
+XSingleProgramTarget(xtrek,$(OBJS2),,LOC_LIB)
+XSingleProgramTarget($(XTREKD),$(OBJS1),,$(LIBS))
+XSingleProgramTarget(xtrekb,$(OBJS3),,$(LIBS))
+XMakeFonts()
+XFontTarget(xtrek)
+XAllTarget($(OBJSF))
+XDependTarget()
+X
+X#ifdef NO_INETD
+XInstallProgram($(XTREKD),$(BINDIR))
+X#else
+XInstallProgram($(XTREKD),$(XTREKDIR))
+X#endif
+XInstallProgram(xtrek,$(BINDIR))
+XInstallProgram(xtrekb,$(BINDIR))
+XInstallManPage(xtrek,$(MANDIR))
+XInstallManPage(xtrekb,$(MANDIR))
+XInstallManPage(xtrek_ship,$(MANDIR))
+XInstallFonts($(XTREKDIR))
+X
+Xbitmaps.h:   bitmaps.c
+X	sed -e '1i\
+X		/* DO NOT EDIT THIS FILE. It is machine generated. */'\
+X	    -e 's/[ 	]*=[ 	]*{[ 	]*$$/;\
+X		%MARKTEXT%/'\
+X	    bitmaps.c |\
+X	sed -e 's/^char/extern char/'\
+X	    -e 's/^Pixmap/extern Pixmap/'\
+X	    -e '/[ 	]*%MARKTEXT%[ 	]*$$/,/[ 	]*}[ 	]*;[ 	]*$$/d'\
+X	    > bitmaps.h
+X
+Xinstall::
+X	-mkdir $(XTREKDIR)
+X	touch $(XTREKDIR)/planets $(XTREKDIR)/motd
+X	touch $(XTREKDIR)/scores.dir $(XTREKDIR)/scores.pag
+X	chmod 600 $(XTREKDIR)/planets $(XTREKDIR)/motd
+X	chmod 644 $(XTREKDIR)/scores.dir $(XTREKDIR)/scores.pag
+X	chmod u+s $(XTREKDIR)/$(XTREKD)
+X	-chmod u+w $(XTREKDIR)/xtrek.doc
+X	-cp doc $(XTREKDIR)/xtrek.doc
+X	chmod 444 $(XTREKDIR)/xtrek.doc
+X#if defined(OPENWINDOWS)
+X	-(convertfont xtrek.bdf; bldfamily)
+X	-cp xtrek.ff xtrek31.fb Families.list Synonyms.list $(XTREKDIR)
+X	-chmod 444 $(XTREKDIR)/xtrek.ff $(XTREKDIR)/xtrek31.fb
+X	-chmod 444 $(XTREKDIR)/Families.list $(XTREKDIR)/Synonyms.list
+X#endif
+X
+X#ifdef NO_INETD
+Xinstall::
+X	chmod 4711 $(BINDIR)/$(XTREKD)
+X#endif
+X
+Xlint: $(LINTFILES)
+X	$(LINT) $(LINTXLIB) *.ln > xtrek.lint 2>&1
+X
+X/* This is only used on HP 9000/800 to hide duplicate symbols. */
+Xkludge.X11.a:	/usr/lib/libX11.a
+X	cp /usr/lib/libX11.a kludge.libX11.a	# Copy X11 lib
+X	chmod u+w kludge.libX11.a		# make our copy writeable
+X	ar xv kludge.libX11.a Berklib.o		# Copy offending module
+X	ld -r -o templib.o -h bcopy -h random -h srandom Berklib.o # Hide syms
+X	ar dv kludge.libX11.a Berklib.o		# Remove offending module
+X	ar rv kludge.libX11.a templib.o		# Add fixed module
+X	/bin/rm templib.o			# Remove temp file
+X
+Xshar:
+X	makekit -s50k -oMANIFEST READ* INSTALL* TODO xtrek.man xtrek_ship.man xtrekb.man Imakefile Makefile doc *.h *.c xtrek.bdf clock.bitmap
+X
+Xcpio:
+X	for i in READ* INSTALL* TODO xtrek.man xtrek_ship.man xtrekb.man Imakefile Makefile doc *.h *.c xtrek.bdf clock.bitmap; do /bin/echo $$i; done | cpio -ocB > xtrek.cpio
+X
+Xtar:
+X	tar cf xtrek.tar READ* INSTALL* TODO xtrek.man xtrek_ship.man xtrekb.man Imakefile Makefile doc *.h *.c xtrek.bdf clock.bitmap
+X
+X.c.ln:
+X	$(LINT) $(LINTFLAGS) $< > $*.p1 2>&1
+END_OF_Imakefile
+if test 6420 -ne `wc -c <Imakefile`; then
+    echo shar: \"Imakefile\" unpacked with wrong size!
+fi
+# end of overwriting check
+fi
+if test -f defs.h -a "${1}" != "-c" ; then
+  echo shar: Will not over-write existing file \"defs.h\"
+else
+echo shar: Extracting \"defs.h\" \(6176 characters\)
+sed "s/^X//" >defs.h <<'END_OF_defs.h'
+X/* static char sccsid[] = "@(#)defs.h	3.1"; */
+X/*
+X
+X	Copyright (c) 1986 	Chris Guthrie
+X
+XPermission to use, copy, modify, and distribute this
+Xsoftware and its documentation for any purpose and without
+Xfee is hereby granted, provided that the above copyright
+Xnotice appear in all copies and that both that copyright
+Xnotice and this permission notice appear in supporting
+Xdocumentation.  No representations are made about the
+Xsuitability of this software for any purpose.  It is
+Xprovided "as is" without express or implied warranty.
+X
+X*/
+X
+X#include "xtrekfont.h"
+X
+X#define	PROGRAM_NAME	"xtrek"
+X
+X#define	DEF_TCP_PORT	5701	/* The default TCP port if not in services */
+X
+X#define MAXPLAYER	16
+X#define MAXPLANETS	40
+X#define	MAXPLANETTYPES	8
+X#define MAXTORP		12	/* per player */
+X
+X/* These are configuration definitions */
+X
+X/* Timing */
+X#define UPDATE 200000			/* Update time is 200000 us */
+X#define UPS (1000000/UPDATE)
+X#define WARP1 (200 / UPS) 		/* warp 1 moves 200 spaces per sec */
+X#define DEATHTIME (6 * UPS) 		/* Player is dead for 6 seconds */
+X#define PFIRETIME (1 * UPS) 		/* Phaser fires for 1 second */
+X#define TFIREMIN (3 * UPS) 		/* Torp lives at least 3 sec */
+X#define TFIREVAR (6 * UPS)		/* Torp may live up to 6 more sec */
+X#define TEXPTIME (1 * UPS)		/* Torp explodes for 1 sec */
+X#define PWEAPLOCKMIN (10 * UPS)		/* Weapons lock for at least 10 sec */
+X#define PWEAPLOCKVAR (15 * UPS)		/* Weapons may lock for 15 sec more */
+X#define PENGLOCKMIN (10 * UPS) 		/* Engines lock for at least 10 sec */
+X#define PENGLOCKVAR (15 * UPS) 		/* Engines may lock for 15 sec more */
+X#define PSELFDESTTIME (10 * UPS)	/* Self destruct in 10 sec */
+X#define RGIVEUPTIME (60 * UPS)		/* Robot gives up in 60 sec */
+X#define ORBSPEED 2	/* This is the fastest a person can go into orbit */
+X#define PEXPTIME (10)	/* Player explodes for 10 frames (2 sec) */
+X#define AUTOQUIT 60	/* auto logout in 60 secs */
+X
+X/* Space */
+X#define GWIDTH 100000   /* galaxy is 100000 spaces on a side */
+X#define SCALE 40	/* Window will be one pixel for this many spaces */
+X#define EXPDIST 400	/* At this range a torp will explode */
+X#define DETDIST 2500	/* At this range a player can detonate a torp */
+X#define TDAMDIST 1500   /* At this range a torp does damage when it explodes */
+X#define ORBDIST 900	/* At this range a player can orbit a planet */
+X#define PFIREDIST 1500	/* At this range a planet will shoot at a player */
+X#define	DEF_XWINSIZE 500	/* Default X coord window size */
+X#define	DEF_YWINSIZE 500	/* Default Y coord window size */
+X#define	MAX_TB_RANGE 10000	/* Tractor beams are ineffective beyond this range */
+X
+X/* These are memory sections */
+X#define PLAYER 1
+X#define MAXMESSAGE 50
+X
+X#define rosette(x)	((((x) + 256/VIEWS/2) / (256/VIEWS)) % VIEWS)
+X
+X/* These are the teams */
+X/* Note that I used bit types for these mostly for messages and
+X   war status.  This was probably a mistake.  It meant that Ed
+X   had to add the 'remap' area to map these (which are used throughout
+X   the code as the proper team variable) into a nice four team deep
+X   array for his color stuff.  Oh well.
+X*/
+X#define FED		1
+X#define ROM		2
+X#define KLI		3
+X#define ORI		4
+X#define NUMTEAM		4	/* Four "real" teams */
+X#define	SELFRULED	5
+X#define	NOTEAM		6
+X#define	GOD		7
+X#define MAXTEAM		GOD
+X/*
+X** These are random configuration variables
+X*/
+X#define VICTORY 30	/* Number of planets needed to conquer the galaxy */
+X#define WARNTIME 30	/* Number of updates to have a warning on the screen */
+X#define MESSTIME 30	/* Number of updates to have a message on the screen */
+X#define	DEF_MESSAGESIZE	20	/* Height of message window */
+X#define	DEF_BORDER	4	/* Size of window borders */
+X
+X#define TARG_PLAYER	0x1	/* Flags for gettarget */
+X#define TARG_PLANET	0x2
+X#define TARG_CLOAK	0x4	/* Include cloaked ships in search */
+X#define	TARG_MYSELF	0x8	/* Allow myself */
+X
+X/* Data files to make the game play across daemon restarts. */
+X
+X#define PLFILE		"planets"
+X#define SCOREFILE	"scores"
+X#define MOTD		"motd"
+X
+X#include "struct.h"
+X
+X/* Other stuff that Ed added */
+X
+X#define ABS(a)			/* abs(a) */ (((a) < 0) ? -(a) : (a))
+X
+X#define myTorp(t)		(p->p_ship->s_no == (t)->t_owner)
+X#define friendlyTorp(t)		((!((1 << p->p_ship->s_team) & (t)->t_war)) || (myTorp(t)))
+X#define myPhaser(x)		(&phasers[p->p_ship->s_no] == (x))
+X#define friendlyPhaser(x)	(p->p_ship->s_team == players[(x) - phasers].p_ship->s_team)
+X#define myPlayer(x)		(p == (x))
+X#define myPlanet(x)		(p->p_ship->s_team == (x)->pl_owner)
+X#define friendlyPlayer(x)	((!((1<<p->p_ship->s_team) & \
+X				    ((x)->p_ship->s_swar | (x)->p_ship->s_hostile))) && \
+X				    (!((1<<(x)->p_ship->s_team) & \
+X				    (p->p_ship->s_swar | p->p_ship->s_hostile))))
+X#define isAlive(x)		((x)->p_status == PALIVE)
+X#define	isGod(x)		((x)->p_ship->s_team == GOD)
+X#define friendlyPlanet(x)	((x)->pl_info & (1 << p->p_ship->s_team) && \
+X			!((1 << (x)->pl_owner) & (p->p_ship->s_swar | p->p_ship->s_hostile)))
+X
+X#define torpColor(t)		\
+X	(myTorp(t) ? p->myColor : p->shipCol[players[(t)->t_owner].p_ship->s_team])
+X#define phaserColor(x)		\
+X	(myPhaser(x) ? p->myColor : p->shipCol[players[(x) - phasers].p_ship->s_team])
+X#define playerColor(x)		\
+X	(myPlayer(x) ? p->myColor : p->shipCol[(x)->p_ship->s_team])
+X#define planetColor(x)		\
+X	((x)->pl_type == MOON ? p->moonColor : \
+X	((x)->pl_type == SUN ? p->sunColor : \
+X	(((x)->pl_info & (1 << p->p_ship->s_team)) ? p->shipCol[(x)->pl_owner] : p->unColor)))
+X#define mplanetGlyph(x)		\
+X	((x)->pl_type == MOON ? MMOON_GLYPH : \
+X	((x)->pl_type == SUN ? MSUN_GLYPH : \
+X	(((((x)->pl_info & (1 << p->p_ship->s_team)) ? \
+X	( p->mono ? (x)->pl_owner : 0 ) : 0)+MPLANET_GLYPHS))))
+X#define planetGlyph(x)		\
+X	((x)->pl_type == MOON ? MOON_GLYPH : \
+X	((x)->pl_type == SUN ? SUN_GLYPH : \
+X	(((((x)->pl_info & (1 << p->p_ship->s_team)) ? \
+X	( p->mono ? (x)->pl_owner : 0 ) : 0)+PLANET_GLYPHS))))
+X
+X#define planetFont(x)		\
+X	(myPlanet(x) ? p->bfont : friendlyPlanet(x) ? p->ifont : p->dfont)
+X#define shipFont(x)		\
+X	(myPlayer(x) ? p->bfont : friendlyPlayer(x) ? p->ifont : p->dfont)
+X
+X/* Macros for X11 (nurk) */
+X#define fontWidth(f)	((f)->max_bounds.width)
+X#define fontHeight(f)	((f)->max_bounds.ascent + (f)->max_bounds.descent)
+X
+X#define	TRIGSCALE	13	/* trig values are multiplied by 8K */
+END_OF_defs.h
+if test 6176 -ne `wc -c <defs.h`; then
+    echo shar: \"defs.h\" unpacked with wrong size!
+fi
+# end of overwriting check
+fi
+if test -f pstats.c -a "${1}" != "-c" ; then
+  echo shar: Will not over-write existing file \"pstats.c\"
+else
+echo shar: Extracting \"pstats.c\" \(6104 characters\)
+sed "s/^X//" >pstats.c <<'END_OF_pstats.c'
+Xstatic char sccsid[] = "@(#)pstats.c	3.1";
+X
+X/*
+X
+X	Copyright (c) 1986 	Chris Guthrie
+X
+XPermission to use, copy, modify, and distribute this
+Xsoftware and its documentation for any purpose and without
+Xfee is hereby granted, provided that the above copyright
+Xnotice appear in all copies and that both that copyright
+Xnotice and this permission notice appear in supporting
+Xdocumentation.  No representations are made about the
+Xsuitability of this software for any purpose.  It is
+Xprovided "as is" without express or implied warranty.
+X
+X*/
+X
+X
+X#include <X11/Xlib.h>
+X#include <stdio.h>
+X#if !defined(cray)
+X#include <sys/types.h>
+X#endif
+X
+X#if defined(hpux) || defined(cray)
+X#include <time.h>
+X#include <fcntl.h>
+X#else
+X#include <sys/time.h>
+X#endif
+X
+X#include <sys/resource.h>
+X#include <sys/file.h>
+X#if defined(NDBM)
+X# include <ndbm.h>
+X#endif
+X#if !defined(NDBM)
+X#if !defined(cray)
+X#  include <dbm.h>
+X#else
+X#  include <rpcsvc/dbm.h>
+X#endif
+X#endif
+X
+X#include "defs.h"
+X#include "data.h"
+X
+Xsavestats(p)
+Xregister struct player	*p;
+X{
+X#if defined(NDBM)
+X    register DBM	*db;
+X#endif
+X    char		buf[80];
+X    datum		key, sinfo;
+X    long		now;
+X    struct stats	old;
+X    char		fname[132];
+X
+X	sprintf(fname, "%s/%s", DIR, SCOREFILE);
+X
+X#if defined(NDBM)
+X    db = dbm_open(fname, O_RDWR, 0700);
+X    if (db == (DBM *) NULL)
+X	return;
+X#else
+X    dbminit(fname);
+X#endif
+X
+X    if (p->p_flags & PFROBOT)
+X	sprintf(buf, "%s", p->p_name);
+X    else
+X	sprintf(buf, "%s", p->p_login);
+X
+X    time(&now);
+X    p->p_stats.st_time += (now - p->p_start_time);
+X
+X    if (p->p_stats.st_maxkills < p->p_ship->s_stats.st_kills)
+X	p->p_stats.st_maxkills = p->p_ship->s_stats.st_kills;
+X
+X    sinfo.dptr = (char *) &p->p_stats;
+X    sinfo.dsize = sizeof (struct stats);
+X    key.dptr = buf;
+X    key.dsize = strlen(buf) + 1;
+X#if defined(NDBM)
+X    dbm_store(db, key, sinfo, DBM_INSERT);
+X    (void) dbm_close(db);
+X#else
+X    store(key, sinfo);
+X    dbmclose();
+X#endif
+X}
+X
+Xgetstats(p)
+Xregister struct player	*p;
+X{
+X#if defined(NDBM)
+X    register DBM	*db;
+X#endif
+X    char		buf[80];
+X    datum		key, sinfo;
+X    char		fname[132];
+X
+X	sprintf(fname, "%s/%s", DIR, SCOREFILE);
+X
+X#if defined(NDBM)
+X    db = dbm_open(fname, O_RDWR, 0700);
+X    if (db == (DBM *) NULL) {
+X	resetpstats(p);
+X	return;
+X    }
+X#else
+X    dbminit(fname);
+X#endif
+X
+X    if (p->p_flags & PFROBOT)
+X	sprintf(buf, "%s", p->p_name);
+X    else
+X	sprintf(buf, "%s", p->p_login);
+X
+X    key.dptr = buf;
+X    key.dsize = strlen(buf) + 1;
+X#if defined(NDBM)
+X    sinfo = dbm_fetch(db, key);
+X#else
+X    sinfo = fetch(key);
+X#endif
+X    if (sinfo.dptr) {
+X	bcopy(sinfo.dptr, &p->p_stats, sizeof (struct stats));
+X        key.dptr = buf;
+X        key.dsize = strlen(buf) + 1;
+X#if defined(NDBM)
+X	dbm_delete(db, key);
+X#else
+X	delete(key);
+X#endif
+X    } else
+X	resetpstats(p);
+X
+X#if defined(NDBM)
+X    (void) dbm_close(db);
+X#else
+X    dbmclose();
+X#endif
+X}
+X
+Xresetsstats(p)
+Xregister struct player	*p;
+X{
+X	p->p_ship->s_stats.st_kills = 0;
+X	p->p_ship->s_stats.st_losses = 0;
+X	p->p_ship->s_stats.st_entries = 0;
+X	p->p_ship->s_stats.st_conqs = 0;
+X	p->p_ship->s_stats.st_coups = 0;
+X	p->p_ship->s_stats.st_torps = 0;
+X	p->p_ship->s_stats.st_phasers = 0;
+X	p->p_ship->s_stats.st_armsbomb = 0;
+X	p->p_ship->s_stats.st_armsship = 0;
+X	p->p_ship->s_stats.st_planets = 0;
+X	p->p_ship->s_stats.st_genocides = 0;
+X}
+X
+Xresetpstats(p)
+Xregister struct player	*p;
+X{
+X	p->p_stats.st_kills = 0;
+X	p->p_stats.st_losses = 0;
+X	p->p_stats.st_entries = 0;
+X	p->p_stats.st_conqs = 0;
+X	p->p_stats.st_coups = 0;
+X	p->p_stats.st_torps = 0;
+X	p->p_stats.st_phasers = 0;
+X	p->p_stats.st_armsbomb = 0;
+X	p->p_stats.st_armsship = 0;
+X	p->p_stats.st_planets = 0;
+X	p->p_stats.st_genocides = 0;
+X}
+X
+Xcalcstats(p)
+Xregister struct player	*p;
+X{
+X	p->p_stats.st_kills += p->p_ship->s_stats.st_kills;
+X	if (p->p_stats.st_maxkills < p->p_ship->s_stats.st_kills)
+X	    p->p_stats.st_maxkills = p->p_ship->s_stats.st_kills;
+X
+X	p->p_stats.st_losses += p->p_ship->s_stats.st_losses;
+X	p->p_stats.st_entries += p->p_ship->s_stats.st_entries;
+X	p->p_stats.st_conqs += p->p_ship->s_stats.st_conqs;
+X	p->p_stats.st_coups += p->p_ship->s_stats.st_coups;
+X	p->p_stats.st_torps += p->p_ship->s_stats.st_torps;
+X	p->p_stats.st_phasers += p->p_ship->s_stats.st_phasers;
+X	p->p_stats.st_armsbomb += p->p_ship->s_stats.st_armsbomb;
+X	p->p_stats.st_armsship += p->p_ship->s_stats.st_armsship;
+X	p->p_stats.st_planets += p->p_ship->s_stats.st_planets;
+X	p->p_stats.st_genocides += p->p_ship->s_stats.st_genocides;
+X}
+X
+Xvoid
+Xliststats(fid)
+Xint	fid;
+X{
+X#if defined(NDBM)
+X    DBM		*sdb;
+X#endif
+X    datum	key, sinfo;
+X    char	buf[132];
+X    char	fname[132];
+X    struct stats old;
+X    extern int	errno;
+X
+X	sprintf(fname, "%s/%s", DIR, SCOREFILE);
+X
+X#if defined(NDBM)
+X    sdb = dbm_open(fname, O_RDONLY, 0700);
+X    if (sdb == (DBM *) NULL)
+X#else
+X    if (dbminit(fname) < 0)
+X#endif
+X    {
+X	sprintf(buf, "liststats: Can't open SCOREFILE %s\nerror = %d\n", fname, errno);
+X	write(fid, buf, strlen(buf));
+X	return;
+X    }
+X
+X  /*         0123456789012345678901234567890123456789012345678901234567890*/
+Xstrcpy(buf, "Name                     rtime     kills  maxkills  losses\n");
+X	write(fid, buf, strlen(buf));
+Xstrcpy(buf, "entries conqs coups   torps phasers  abomb aship planets gens ratio\n\n");
+X	write(fid, buf, strlen(buf));
+X
+X#if defined(NDBM)
+X    key = dbm_firstkey(sdb);
+X#else
+X    key = firstkey();
+X#endif
+X	while (key.dptr) {
+X#if defined(NDBM)
+X		sinfo = dbm_fetch(sdb, key);
+X#else
+X		sinfo = fetch(key);
+X#endif
+X		bcopy(sinfo.dptr, &old, sizeof (struct stats));
+X		if (old.st_entries > 0) {
+Xsprintf(buf, "%-24s %8d %6.2f  %6.2f  %5d\n",
+X			key.dptr,
+X			old.st_time,
+X			old.st_kills,
+X			old.st_maxkills,
+X			old.st_losses);
+Xwrite(fid, buf, strlen(buf));
+Xsprintf(buf, "%7d %5d %5d %7d %7d %6d %5d %7d %4d %5.3f\n",
+X			old.st_entries,
+X			old.st_conqs,
+X			old.st_coups,
+X			old.st_torps,
+X			old.st_phasers,
+X			old.st_armsbomb,
+X			old.st_armsship,
+X			old.st_planets,
+X			old.st_genocides,
+X			(old.st_losses ? old.st_kills / old.st_losses : (old.st_kills * 2.0)));
+Xwrite(fid, buf, strlen(buf));
+Xwrite(fid, "\n", 1);
+X		}
+X#if defined(NDBM)
+X		key = dbm_nextkey(sdb);
+X#else
+X		key = nextkey(key);
+X#endif
+X    }
+X#if defined(NDBM)
+X    (void) dbm_close(sdb);
+X#else
+X    dbmclose();
+X#endif
+X}
+END_OF_pstats.c
+if test 6104 -ne `wc -c <pstats.c`; then
+    echo shar: \"pstats.c\" unpacked with wrong size!
+fi
+# end of overwriting check
+fi
+if test -f smessage.c -a "${1}" != "-c" ; then
+  echo shar: Will not over-write existing file \"smessage.c\"
+else
+echo shar: Extracting \"smessage.c\" \(6225 characters\)
+sed "s/^X//" >smessage.c <<'END_OF_smessage.c'
+Xstatic char sccsid[] = "@(#)smessage.c	3.1";
+X
+X/*
+X
+X	Copyright (c) 1986 	Chris Guthrie
+X
+XPermission to use, copy, modify, and distribute this
+Xsoftware and its documentation for any purpose and without
+Xfee is hereby granted, provided that the above copyright
+Xnotice appear in all copies and that both that copyright
+Xnotice and this permission notice appear in supporting
+Xdocumentation.  No representations are made about the
+Xsuitability of this software for any purpose.  It is
+Xprovided "as is" without express or implied warranty.
+X
+X*/
+X
+X
+X#include <X11/Xlib.h>
+X#include <stdio.h>
+X#include <math.h>
+X#include <signal.h>
+X#include <ctype.h>
+X#include "defs.h"
+X#include "data.h"
+X
+X
+Xsmessage(p, ichar)
+Xregister struct player	*p;
+Xchar ichar;
+X{
+X    register int i;
+X
+X    if (p->p_umsg.m_pending == 0) {
+X	p->p_umsg.m_pending = 1;
+X	if (p->p_mdisplayed) {
+X		XFillRectangle(p->display, p->messagew, p->cleargc, 5 + fontWidth(p->dfont), 5,
+X		    p->p_lastcount, fontHeight(p->dfont));
+X	    p->p_mdisplayed = 0;
+X	}
+X	/* Put the proper recipient in the window */
+X	if (getaddr(p, ichar) < 0) {
+X	    /* print error message */
+X	    p->p_umsg.m_pending = 0;
+X	    return;
+X	}
+X	XDrawImageString(p->display, p->messagew, p->dfgc, 5 + fontWidth(p->dfont), 5 + p->dfont->ascent,
+X	    p->p_umsg.m_addrmsg, UMSGADDRLEN);
+X	p->p_umsg.m_lcount = UMSGADDRLEN;
+X	return;
+X    }
+X    switch (ichar) {
+X	case '\b':
+X	case '\177':
+X	    if (--p->p_umsg.m_lcount < UMSGADDRLEN) {
+X		p->p_umsg.m_lcount = UMSGADDRLEN;
+X		break;
+X	    }
+X		XFillRectangle(p->display, p->messagew, p->cleargc, 5 + fontWidth(p->dfont) * p->p_umsg.m_lcount, 5,
+X		    fontWidth(p->dfont), fontHeight(p->dfont));
+X	    break;
+X	case '\027':	/* CTRL-w */
+X	    i = 0;
+X	    /* back up over blanks */
+X	    while (--p->p_umsg.m_lcount >= UMSGADDRLEN && isspace(p->p_umsg.m_buf[p->p_umsg.m_lcount - UMSGADDRLEN]))
+X		i++;
+X	    p->p_umsg.m_lcount++;
+X	    /* back up over non-blanks */
+X	    while (--p->p_umsg.m_lcount >= UMSGADDRLEN && !isspace(p->p_umsg.m_buf[p->p_umsg.m_lcount - UMSGADDRLEN]))
+X		i++;
+X	    p->p_umsg.m_lcount++;
+X
+X	    if (i > 0) {
+X		XFillRectangle(p->display, p->messagew, p->cleargc, 5 + fontWidth(p->dfont) * p->p_umsg.m_lcount, 5,
+X		    fontWidth(p->dfont) * i, fontHeight(p->dfont));
+X	    }
+X	    break;
+X	case '\025':	/* CTRL-u */
+X	case '\030':	/* CTRL-x */
+X		    while (--p->p_umsg.m_lcount >= UMSGADDRLEN)
+X			XFillRectangle(p->display, p->messagew, p->cleargc, 5 + fontWidth(p->dfont) * UMSGADDRLEN, 5,
+X			    fontWidth(p->dfont) * (p->p_umsg.m_lcount - UMSGADDRLEN), fontHeight(p->dfont));
+X	       p->p_umsg.m_pending = 0;
+X	    break;
+X	case '\033':	/* ESC */
+X		XFillRectangle(p->display, p->messagew, p->cleargc, 5, 5,
+X		    fontWidth(p->dfont) * p->p_umsg.m_lcount,
+X		    fontHeight(p->dfont));
+X		p->p_mdisplayed = 0;
+X		p->p_umsg.m_pending = 0;
+X	    break;
+X	case '\r':
+X	    p->p_umsg.m_buf[p->p_umsg.m_lcount - UMSGADDRLEN] = 0;
+X	    p->p_umsg.m_pending = 0;
+X	    switch (p->p_umsg.m_addr) {
+X		case 'A':
+X		    pmessage(p->p_umsg.m_buf, 0, MALL, p->p_umsg.m_addrmsg);
+X		    break;
+X		case 'F':
+X		case 'f':
+X		    pmessage(p->p_umsg.m_buf, FED, MTEAM, p->p_umsg.m_addrmsg);
+X		    break;
+X		case 'R':
+X		case 'r':
+X		    pmessage(p->p_umsg.m_buf, ROM, MTEAM, p->p_umsg.m_addrmsg);
+X		    break;
+X		case 'K':
+X		case 'k':
+X		    pmessage(p->p_umsg.m_buf, KLI, MTEAM, p->p_umsg.m_addrmsg);
+X		    break;
+X		case 'O':
+X		case 'o':
+X		    pmessage(p->p_umsg.m_buf, ORI, MTEAM, p->p_umsg.m_addrmsg);
+X		    break;
+X		case '0':
+X		case '1':
+X		case '2':
+X		case '3':
+X		case '4':
+X		case '5':
+X		case '6':
+X		case '7':
+X		case '8':
+X		case '9':
+X		    pmessage(p->p_umsg.m_buf, p->p_umsg.m_addr - '0', MINDIV, p->p_umsg.m_addrmsg);
+X		    break;
+X		case 'a':
+X		case 'b':
+X		case 'c':
+X		case 'd':
+X		case 'e':
+X		    pmessage(p->p_umsg.m_buf, p->p_umsg.m_addr - 'a' - 10, MINDIV, p->p_umsg.m_addrmsg);
+X		    break;
+X		default:
+X		    warning(p, "Not legal recipient");
+X	    }
+X		XFillRectangle(p->display, p->messagew, p->cleargc, 5, 5,
+X		    fontWidth(p->dfont) * p->p_umsg.m_lcount, fontHeight(p->dfont));
+X		p->p_mdisplayed = 0;
+X	    p->p_umsg.m_lcount = 0;
+X	    break;
+X	default:
+X	    if (p->p_umsg.m_lcount == UMSGLEN) {
+X		XBell(p->display, p->screen);
+X		break;
+X	    }
+X	    if (iscntrl(ichar))
+X		break;
+X	    XDrawImageString(p->display, p->messagew, p->dfgc, 5 + fontWidth(p->dfont) * p->p_umsg.m_lcount, 5 + p->dfont->ascent,
+X			&ichar, 1);
+X	    p->p_umsg.m_buf[(p->p_umsg.m_lcount++) - UMSGADDRLEN] = ichar;
+X	    break;
+X    }
+X}
+X
+Xpmessage(str, recip, group, address)
+Xchar *str;
+Xint recip;
+Xint group;
+Xchar *address;
+X{
+X    struct message *cur;
+X    if (++(mctl->mc_current) >= MAXMESSAGE)
+X	mctl->mc_current = 0;
+X    cur = &messages[mctl->mc_current];
+X    cur->m_no = mctl->mc_current;
+X    cur->m_flags = group;
+X    cur->m_time = 0;
+X    cur->m_recpt = recip;
+X    (void) sprintf(cur->m_data, "%-9s %s", address, str);
+X    cur->m_flags |= MVALID;
+X}
+X
+Xgetaddr(p, who)
+Xregister struct player	*p;
+Xchar who;
+X{
+X    p->p_umsg.m_addr = who;
+X    (void) sprintf(p->p_umsg.m_addrmsg, " %c%x->", teamlet[p->p_ship->s_team], p->p_ship->s_no);
+X    switch (who) {
+X	case 'A':
+X	    (void) sprintf(&p->p_umsg.m_addrmsg[5], "ALL");
+X	    break;
+X	case 'F':
+X	case 'f':
+X	    (void) sprintf(&p->p_umsg.m_addrmsg[5], "FED");
+X	    break;
+X	case 'R':
+X	case 'r':
+X	    (void) sprintf(&p->p_umsg.m_addrmsg[5], "ROM");
+X	    break;
+X	case 'K':
+X	case 'k':
+X	    (void) sprintf(&p->p_umsg.m_addrmsg[5], "KLI");
+X	    break;
+X	case 'O':
+X	case 'o':
+X	    (void) sprintf(&p->p_umsg.m_addrmsg[5], "ORI");
+X	    break;
+X	case '0':
+X	case '1':
+X	case '2':
+X	case '3':
+X	case '4':
+X	case '5':
+X	case '6':
+X	case '7':
+X	case '8':
+X	case '9':
+X	    if (isAlive(&players[who - '0'])) {
+X		(void) sprintf(&p->p_umsg.m_addrmsg[5], "%c%x ",
+X		    teamlet[players[who - '0'].p_ship->s_team], who - '0');
+X	    }
+X	    else {
+X		warning(p, "Player is not in game");
+X		return(-1);
+X	    }
+X	    break;
+X	case 'a':
+X	case 'b':
+X	case 'c':
+X	case 'd':
+X	case 'e':
+X	    if (isAlive(&players[who - 'a' + 10])) {
+X		(void) sprintf(&p->p_umsg.m_addrmsg[5], "%c%x ",
+X		    teamlet[players[who - 'a' + 10].p_ship->s_team], who - 'a' + 10);
+X	    }
+X	    else {
+X		warning(p, "Player is not in game");
+X		return(-1);
+X	    }
+X	    break;
+X	default:
+X	    warning(p, "Not legal recipient");
+X	    return(-1);
+X    }
+X    return(0);
+X}
+END_OF_smessage.c
+if test 6225 -ne `wc -c <smessage.c`; then
+    echo shar: \"smessage.c\" unpacked with wrong size!
+fi
+# end of overwriting check
+fi
+if test -f stats.c -a "${1}" != "-c" ; then
+  echo shar: Will not over-write existing file \"stats.c\"
+else
+echo shar: Extracting \"stats.c\" \(6432 characters\)
+sed "s/^X//" >stats.c <<'END_OF_stats.c'
+Xstatic char sccsid[] = "@(#)stats.c	3.1";
+X/*
+X
+X	Copyright (c) 1986 	Chris Guthrie
+X
+XPermission to use, copy, modify, and distribute this
+Xsoftware and its documentation for any purpose and without
+Xfee is hereby granted, provided that the above copyright
+Xnotice appear in all copies and that both that copyright
+Xnotice and this permission notice appear in supporting
+Xdocumentation.  No representations are made about the
+Xsuitability of this software for any purpose.  It is
+Xprovided "as is" without express or implied warranty.
+X
+X*/
+X
+X#include <X11/Xlib.h>
+X#include <X11/cursorfont.h>
+X#include <X11/Xutil.h>
+X#include <stdio.h>
+X#include "defs.h"
+X#include "data.h"
+X
+X#define	MIN(a,b)	(((a) < (b)) ? (a) : (b))
+X#define	MAX(a,b)	(((a) > (b)) ? (a) : (b))
+X
+X/* NOTE: These should be set in player data? */
+X#define	BX_OFF()	((p->textWidth + 1) * fontWidth(p->dfont) + S_IBORDER)
+X#define	BY_OFF(line)	((line) * (fontHeight(p->dfont) + S_IBORDER) + S_IBORDER)
+X#define	TX_OFF(len)	((p->textWidth - len) * fontWidth(p->dfont) + S_IBORDER)
+X#define	TY_OFF(line)	BY_OFF(line)
+X
+X#define STAT_WIDTH		160
+X#define STAT_HEIGHT		BY_OFF(NUM_SLIDERS)
+X#define STAT_BORDER		2
+X#define S_IBORDER		5
+X#define STAT_X			422
+X#define STAT_Y			13
+X
+X#define SL_WID			\
+X	(STAT_WIDTH - 2 * S_IBORDER - (p->textWidth + 1) * fontWidth(p->dfont))
+X#define SL_HEI			(fontHeight(p->dfont))
+X
+X#define NUM_ELS(a)		(sizeof (a) / sizeof (*(a)))
+X#define NUM_SLIDERS		NUM_ELS(sliders)
+X
+Xtypedef struct slider {
+X	char	*label;
+X	int	min, max;
+X	int	low_red, high_red;
+X	int	label_length;
+X	int	diff;
+X} SLIDER;
+X
+Xstatic SLIDER	sliders[] = {
+X	{ "Shields",		0,	100,	20,	100	},
+X	{ "Damage",		0,	100,	0,	0	},
+X	{ "Fuel",		0,	10000,	1000,	10000	},
+X	{ "Warp",		0,	9,	0,	9	},
+X	{ "Weapon Temp",	0,	1200,	0,	1000	},
+X	{ "Engine Temp",	0,	1200,	0,	1000	},
+X};
+X
+XinitStats(p, prog)
+Xregister struct player	*p;
+X	char	*prog;
+X{
+X	int	i;
+X	char	*str;
+X	unsigned int dummy1, dummy2;
+X
+X	if ((str = XGetDefault(p->display, prog, "stats.geometry")) != NULL) {
+X		p->uspec = XParseGeometry(str, &p->statX, &p->statY, &dummy1, &dummy2);
+X		if ((p->uspec & (XValue|XNegative)) == (XValue|XNegative))
+X			p->statX = -(p->statX);
+X		if ((p->uspec & (YValue|YNegative)) == (YValue|YNegative))
+X			p->statY = -(p->statY);
+X	}
+X	for (i = 0; i < NUM_SLIDERS; i++) {
+X		sliders[i].label_length = strlen(sliders[i].label);
+X		p->textWidth = MAX(p->textWidth, sliders[i].label_length);
+X		sliders[i].diff = sliders[i].max - sliders[i].min;
+X	}
+X}
+X
+XWindow
+XopenStats(p)
+Xstruct player	*p;
+X{
+X	Window		w;
+X	extern char 	*calloc();
+X	XSizeHints	wininfo;
+X	XGCValues	values;
+X
+X	if (p->statwin) {
+X		closeStats(p, p->statwin);
+X	}
+X	p->p_flags |= PFSHOWSTATS;
+X
+X	w = XCreateWindow(p->display, RootWindow(p->display, p->screen), p->statX, p->statY,
+X		(unsigned) STAT_WIDTH, (unsigned) STAT_HEIGHT, STAT_BORDER, DefaultDepth(p->display, p->screen), InputOutput,
+X		(Visual *)CopyFromParent, 0L, (XSetWindowAttributes *)0);
+X	(void) XSetWMProtocols(p->display, w, &p->wm_delete_window, 1);
+X	XDefineCursor(p->display, w, (Cursor) XCreateFontCursor(p->display, XC_crosshair));
+X	wininfo.x = p->statX;
+X	wininfo.y = p->statY;
+X	wininfo.width = STAT_WIDTH;
+X	wininfo.height = STAT_HEIGHT;
+X	wininfo.min_width = STAT_WIDTH;
+X	wininfo.min_height = STAT_HEIGHT;
+X	wininfo.max_width = STAT_WIDTH;
+X	wininfo.max_height = STAT_HEIGHT;
+X	if (p->uspec & (XValue|YValue|XNegative|YNegative))
+X		wininfo.flags = USPosition | PSize | PMinSize | PMaxSize;
+X	else
+X		wininfo.flags = PPosition | PSize | PMinSize | PMaxSize;
+X	XSetNormalHints(p->display, w, &wininfo);
+X	XStoreName(p->display, w, "xtrek-stats");
+X	XSetWindowBackground(p->display, w, p->backColor);
+X	XSetWindowBorder(p->display, w, p->borderColor);
+X	values.foreground = p->myColor;
+X	values.background = p->backColor;
+X	p->sgc = XCreateGC(p->display, w, GCForeground|GCBackground, &values);
+X	p->p_rp = (RECORD *) calloc(NUM_SLIDERS, sizeof (RECORD));
+X	p->p_rp[0].data = &(p->p_ship->s_shield);
+X	p->p_rp[1].data = &(p->p_ship->s_damage);
+X	p->p_rp[2].data = &(p->p_ship->s_fuel);
+X	p->p_rp[3].data = &(p->p_ship->s_speed);
+X	p->p_rp[4].data = &(p->p_ship->s_wtemp);
+X	p->p_rp[5].data = &(p->p_ship->s_etemp);
+X	XSelectInput(p->display, w, ExposureMask|SubstructureNotifyMask);
+X	XMapWindow(p->display, w);
+X	return (w);
+X}
+X
+XredrawStats(p, w)
+Xregister struct player	*p;
+XWindow	w;
+X{
+X	int	i;
+X
+X	if (p->p_rp == NULL) {
+X		fputs("You gave redrawStats a bum window\n", stderr);
+X		return;
+X	}
+X	XClearWindow(p->display, w);
+X	for (i = 0; i < NUM_SLIDERS; i++) {
+X		p->p_rp[i].last_value = 0;
+X		XSetForeground(p->display, p->sgc, p->myColor);
+X		XDrawImageString(p->display, w, p->sgc, TX_OFF(sliders[i].label_length), TY_OFF(i) + p->dfont->ascent,
+X			sliders[i].label, sliders[i].label_length);
+X		box(p, w, 0, BX_OFF() - 1, BY_OFF(i) - 1, SL_WID+1, SL_HEI+1, p->myColor);
+X	}
+X}
+X
+XcloseStats(p, w)
+Xregister struct player	*p;
+X	Window	w;
+X{
+X	XWindowAttributes wa;
+X
+X	XFreeGC(p->display, p->sgc);
+X	XGetWindowAttributes(p->display, w, &wa);
+X	p->statX = wa.x;
+X	p->statY = wa.y;
+X	XDestroyWindow(p->display, w);
+X	p->p_flags &= ~PFSHOWSTATS;
+X	p->statwin = (Window) NULL;
+X}
+X
+XupdateStats(p, w)
+Xregister struct player *p;
+X	Window		w;
+X{
+X	int	i, value, diff, old_x, new_x, wid;
+X	unsigned long	color;
+X	RECORD	*r;
+X	SLIDER	*s;
+X
+X	for (i = 0; i < NUM_SLIDERS; i++) {
+X		r = &p->p_rp[i];
+X		s = &sliders[i];
+X		value = *(r->data);
+X		if (value < s->min)
+X			value = s->min;
+X		else if (value > s->max)
+X			value = s->max;
+X		if (value == r->last_value)
+X			continue;
+X		diff = value - r->last_value;
+X		color = p->myColor;
+X		if (value < s->low_red)
+X			color = p->warningColor;
+X		else if (value > s->high_red)
+X			color = p->warningColor;
+X		old_x = r->last_value * SL_WID / s->diff;
+X		new_x = value * SL_WID / s->diff;
+X		wid = new_x - old_x;
+X		if (wid == 0)
+X			continue;
+X		if (wid < 0)
+X			wid = -wid;
+X		if (new_x > 0)
+X			box(p, w, 1, BX_OFF(), BY_OFF(i), new_x, SL_HEI, color);
+X		if (diff < 0)
+X			cbox(p, w, BX_OFF() + new_x, BY_OFF(i), wid, SL_HEI);
+X		r->last_value = value;
+X	}
+X}
+X
+X/*ARGSUSED*/
+Xbox(p, w, filled, x, y, width, height, color)
+Xregister struct player	*p;
+XWindow	w;
+Xint	filled;
+Xint	x, y;
+Xunsigned width, height;
+Xunsigned long	color;
+X{
+X	XSetForeground(p->display, p->sgc, color);
+X	if (filled)
+X		XFillRectangle(p->display, w, p->sgc, x, y, width, height);
+X	else
+X		XDrawRectangle(p->display, w, p->sgc, x, y, width, height);
+X}
+X
+Xcbox(p, w, x, y, width, height)
+Xregister struct player	*p;
+XWindow	w;
+Xint	x, y;
+Xunsigned width, height;
+X{
+X	XClearArea(p->display, w, x, y, width, height, False);
+X}
+END_OF_stats.c
+if test 6432 -ne `wc -c <stats.c`; then
+    echo shar: \"stats.c\" unpacked with wrong size!
+fi
+# end of overwriting check
+fi
+if test -f war.c -a "${1}" != "-c" ; then
+  echo shar: Will not over-write existing file \"war.c\"
+else
+echo shar: Extracting \"war.c\" \(5546 characters\)
+sed "s/^X//" >war.c <<'END_OF_war.c'
+Xstatic char sccsid[] = "@(#)war.c	3.1";
+X/*
+X
+X	Copyright (c) 1986 	Chris Guthrie
+X
+XPermission to use, copy, modify, and distribute this
+Xsoftware and its documentation for any purpose and without
+Xfee is hereby granted, provided that the above copyright
+Xnotice appear in all copies and that both that copyright
+Xnotice and this permission notice appear in supporting
+Xdocumentation.  No representations are made about the
+Xsuitability of this software for any purpose.  It is
+Xprovided "as is" without express or implied warranty.
+X
+X*/
+X
+X#include <X11/Xlib.h>
+X#include <stdio.h>
+X#include <math.h>
+X#include <signal.h>
+X#include "defs.h"
+X#include "data.h"
+X
+X/* Set up the war window and map it */
+Xstatic char *feds = "FED - ";
+Xstatic char *roms = "ROM - ";
+Xstatic char *klis = "KLI - ";
+Xstatic char *oris = "ORI - ";
+Xstatic char *gos = "  Re-program";
+Xstatic char *exs = "  Exit - no change";
+Xstatic char *peaces = "Peace";
+Xstatic char *hostiles = "Hostile";
+Xstatic char *wars = "War";
+X
+Xwarwindow(p)
+Xregister struct player	*p;
+X{
+X    XMapWindow(p->display, p->war);
+X    p->p_ship->s_newhostile = p->p_ship->s_hostile;
+X    p->p_ship->s_reprogram = 0;
+X}
+X
+Xwarrefresh(p)
+Xregister struct player	*p;
+X{
+X    warfed(p);
+X    warrom(p);
+X    warkli(p);
+X    warori(p);
+X    wargo(p);
+X    warno(p);
+X}
+X
+Xwargo(p)
+Xregister struct player	*p;
+X{
+X    XDrawImageString(p->display, p->wargo, p->dfgc, 0, fontHeight(p->dfont) / 2 + p->dfont->ascent, gos, strlen(gos));
+X}
+X
+Xwarno(p)
+Xregister struct player	*p;
+X{
+X    XDrawImageString(p->display, p->warno, p->dfgc, 0, fontHeight(p->dfont) / 2 + p->dfont->ascent, exs, strlen(exs));
+X}
+X
+Xwarfed(p)
+Xregister struct player	*p;
+X{
+X    fillwin(p, p->warf, feds, p->p_ship->s_newhostile, p->p_ship->s_swar, FED);
+X}
+X
+Xwarrom(p)
+Xregister struct player	*p;
+X{
+X    fillwin(p, p->warr, roms, p->p_ship->s_newhostile, p->p_ship->s_swar, ROM);
+X}
+X
+Xwarkli(p)
+Xregister struct player	*p;
+X{
+X    fillwin(p, p->wark, klis, p->p_ship->s_newhostile, p->p_ship->s_swar, KLI);
+X}
+X
+Xwarori(p)
+Xregister struct player	*p;
+X{
+X    fillwin(p, p->waro, oris, p->p_ship->s_newhostile, p->p_ship->s_swar, ORI);
+X}
+X
+Xfillwin(p, win, string, hostile, warbits, team)
+Xregister struct player	*p;
+XWindow win;
+Xchar *string;
+Xint hostile, warbits;
+Xint team;
+X{
+X    char buf[80];
+X
+X	XFillRectangle(p->display, win, p->cleargc, 0, fontHeight(p->dfont) / 2, fontWidth(p->dfont) * 20,
+X	fontHeight(p->dfont));
+X    if ((1 << team) & warbits) {
+X	(void) sprintf(buf, "  %s%s", string, wars);
+X	XDrawImageString(p->display, win, p->dfgc, 0, fontHeight(p->dfont) / 2 + p->dfont->ascent, buf, strlen(buf));
+X    }
+X    else if ((1 << team) & hostile) {
+X	(void) sprintf(buf, "  %s%s", string, hostiles);
+X	XDrawImageString(p->display, win, p->dfgc, 0, fontHeight(p->dfont) / 2 + p->dfont->ascent, buf, strlen(buf));
+X    }
+X    else {
+X	(void) sprintf(buf, "  %s%s", string, peaces);
+X	XDrawImageString(p->display, win, p->dfgc, 0, fontHeight(p->dfont) / 2 + p->dfont->ascent, buf, strlen(buf));
+X    }
+X}
+X
+Xwaraction(p, data)
+Xregister struct player	*p;
+XXKeyEvent *data;
+X{
+X    int changes;
+X
+X    if (data->window == p->warf) {
+X	if (p->p_ship->s_swar & (1 << FED)) {
+X	    warning(p, "You are already at war with the Federation");
+X	    XBell(p->display, 0);
+X	}
+X	else {
+X	    p->p_ship->s_newhostile ^= (1 << FED);
+X	}
+X    }
+X    if (data->window == p->warr) {
+X	if (p->p_ship->s_swar & (1 << ROM)) {
+X	    warning(p, "You are already at war with the Romulans");
+X	    XBell(p->display, 0);
+X	}
+X	else {
+X	    p->p_ship->s_newhostile ^= (1 << ROM);
+X	}
+X    }
+X    if (data->window == p->wark) {
+X	if (p->p_ship->s_swar & (1 << KLI)) {
+X	    warning(p, "You are already at war with the Klingons");
+X	    XBell(p->display, 0);
+X	}
+X	else {
+X	    p->p_ship->s_newhostile ^= (1 << KLI);
+X	}
+X    }
+X    if (data->window == p->waro) {
+X	if (p->p_ship->s_swar & (1 << ORI)) {
+X	    warning(p, "You are already at war with the Orions");
+X	    XBell(p->display, 0);
+X	}
+X	else {
+X	    p->p_ship->s_newhostile ^= (1 << ORI);
+X	}
+X    }
+X    warrefresh(p);
+X
+X    if (data->window == p->wargo) {
+X	changes = p->p_ship->s_hostile ^ p->p_ship->s_newhostile;
+X	if (changes & (1 << FED)) {
+X	    sendwarn(p, "Federation", p->p_ship->s_newhostile & (1 << FED), FED);
+X	}
+X	if (changes & (1 << ROM)) {
+X	    sendwarn(p, "Romulans", p->p_ship->s_newhostile & (1 << ROM), ROM);
+X	}
+X	if (changes & (1 << KLI)) {
+X	    sendwarn(p, "Klingons", p->p_ship->s_newhostile & (1 << KLI), KLI);
+X	}
+X	if (changes & (1 << ORI)) {
+X	    sendwarn(p, "Orions", p->p_ship->s_newhostile & (1 << ORI), ORI);
+X	}
+X	p->p_ship->s_hostile = p->p_ship->s_newhostile;
+X	if (p->p_ship->s_reprogram) {
+X	    p->p_ship->s_delay = p->p_ship->s_updates + isGod(p) ? 0 : (UPS * 10);
+X	    p->p_ship->s_flags |= SFWAR;	/* stop copilots, mostly */
+X	    warning(p, "Pausing ten seconds to re-program battle computers.");
+X	}
+X	XUnmapWindow(p->display, p->war);
+X	return;
+X    }
+X
+X    if (data->window == p->warno) {
+X	XUnmapWindow(p->display, p->war);
+X	return;
+X    }
+X}
+X
+Xsendwarn(p, string, atwar, team)
+Xregister struct player	*p;
+Xchar *string;
+Xint atwar;
+Xint team;
+X{
+X    char buf[BUFSIZ];
+X    char addrbuf[10];
+X
+X    if (atwar) {
+X	(void) sprintf(buf, "%s (%c%x) declaring war on the %s",
+X	    p->p_name,
+X	    teamlet[p->p_ship->s_team],
+X	    p->p_ship->s_no,
+X	    string);
+X	p->p_ship->s_reprogram = 1;
+X    }
+X    else {
+X	(void) sprintf(buf, "%s (%c%x) declaring peace with the %s",
+X	    p->p_name,
+X	    teamlet[p->p_ship->s_team],
+X	    p->p_ship->s_no,
+X	    string);
+X    }
+X
+X    (void) sprintf(addrbuf, " %c%x->%-3s",
+X	teamlet[p->p_ship->s_team],
+X	p->p_ship->s_no,
+X	teamshort[team]);
+X    pmessage(buf, team, MTEAM, addrbuf);
+X}
+END_OF_war.c
+if test 5546 -ne `wc -c <war.c`; then
+    echo shar: \"war.c\" unpacked with wrong size!
+fi
+# end of overwriting check
+fi
+if test -f xtrek.c -a "${1}" != "-c" ; then
+  echo shar: Will not over-write existing file \"xtrek.c\"
+else
+echo shar: Extracting \"xtrek.c\" \(6669 characters\)
+sed "s/^X//" >xtrek.c <<'END_OF_xtrek.c'
+Xstatic char sccsid[] = "@(#)xtrek.c	3.1";
+X#include <sys/types.h>
+X#include <stdio.h>
+X#include <pwd.h>
+X#include <sys/socket.h>
+X#include <sys/ioctl.h>
+X#include <netinet/in.h>
+X#ifdef SUN40
+X#if !defined(sgi)
+X#include <sys/filio.h>
+X#endif
+X#else
+X#if !defined(cray)
+X# define	FD_SET(n, s)	(((s)->fds_bits[0]) |= (1 << n))
+X# define	FD_CLR(n, s)	(((s)->fds_bits[0]) &= ~(1 << n))
+X# define	FD_ZERO(s)	bzero((char *)(s), sizeof (*(s)))
+X# define	FD_ISSET(n, s)	(((s)->fds_bits[0]) & (1 << n))
+X#endif
+X#endif /* SUN40 */
+X#include <setjmp.h>
+X#include <netdb.h>
+X#include <signal.h>
+X#include <string.h>
+X
+Xstruct sockaddr_in	sin;
+Xstruct sockaddr_in	udp_sin;
+Xstruct servent		*sp;
+Xjmp_buf			sdied;
+X
+Xdone()
+X{
+X	fprintf(stderr, "broken pipe\n");
+X	longjmp(sdied);
+X}
+X
+Xmain(ac, av)
+Xregister int	ac;
+Xregister char	**av;
+X{
+X	register struct hostent	*host = (struct hostent *) NULL;
+X	struct passwd	*pwent;
+X	int	s;
+X	char	hostname[80], *p;
+X	char	*h = (char *) NULL;	/* Ptr to server mach name */
+X	char	*display = (char *) NULL;	/* Ptr to X display name */
+X	char	*shipname = "ship";	/* Default ship name for in.xtrekd */
+X	int	qmode;
+X	int	rval;
+X	int	copilot;
+X	struct servent	*sp;
+X	extern struct servent	*getservbyname();
+X	extern char	*getenv();
+X	extern struct passwd	*getpwuid();
+X	/* jas (Jeff Schmidt)  For getopt() command line parsing. */
+X	char	c;
+X	extern int	optind, opterr;
+X	extern char	*optarg;
+X
+X	copilot = 0xFF;
+X	qmode = 0;
+X	p = strrchr(av[0], '/');
+X	if (p == (char *) NULL)
+X		p = av[0];		/* No / found, use av[0] */
+X	else
+X		p++;			/* Use string after / */
+X
+X	/* jas (Jeff Schmidt)  Check for the command line args. */
+X
+X	while ((c = getopt(ac, av, "c:d:n:s:qSPR")) != EOF)
+X		switch (c) {
+X		  case 'c':			/* wants to copilot */
+X		     copilot = strtol(optarg, (char **) NULL, 16);
+X		     break;
+X		  case 'n':			/* Shipname to look for in .Xdefaults */
+X		     shipname = optarg;	break;
+X		  case 'd':			/* X display name follows */
+X		     display = optarg;	break;
+X		  case 's':			/* Xtrek server follows */
+X		     h = optarg;	break;
+X		  case 'q':			/* Query (biff) mode */
+X		     qmode = 1;		break;
+X		  case 'R':			/* Running Score? */
+X		     qmode = 2;		break;
+X		  case 'P':			/* Players? */
+X		     qmode = 3;		break;
+X		  case 'S':			/* List total Scores */
+X		     qmode = 4;		break;
+X		  case '?':			/* getopt() error */
+X		     usage(p);		break;
+X		} /* end switch (c) */
+X
+X	pwent = getpwuid(getuid());
+X	if (pwent == (struct passwd *) NULL) {
+X		printf("Who are you?\n");
+X		exit(-1);
+X	}
+X	if (display == (char *) NULL)
+X		display = getenv("DISPLAY");
+X
+X	if (!qmode && display == (char *) NULL) {
+X		printf("Your DISPLAY environment variable is not set.\n");
+X		exit(-1);
+X	}
+X
+X/*
+X * jas (Jeff Schmidt)  If xtrek server name was not given on the command
+X *  line, then use the XTREKSERVER env variable, or default to "xtrek-server".
+X */
+X	if (h == (char *) NULL) {
+X		h = getenv("XTREKSERVER");
+X		if (h == (char *) NULL)
+X			h = "xtrek-server";
+X	}
+X	sin.sin_addr.s_addr = inet_addr(h);
+X	if (sin.sin_addr.s_addr != -1) {
+X		sin.sin_family = AF_INET;
+X		(void) strcpy(hostname, h);
+X	} else {
+X		host = gethostbyname(h);
+X		if (host) {
+X			sin.sin_family = host->h_addrtype;
+X			bcopy(host->h_addr, (caddr_t) &sin.sin_addr,
+X				host->h_length);
+X			strcpy(hostname, host->h_name, strlen(host->h_name));
+X		} else {
+X			printf("%s: unknown host\n", h);
+X			exit(-1);
+X		}
+X	}
+X	sin.sin_port = 5701;
+X
+X	signal(SIGPIPE, done);
+X#if !defined(NEWINET)
+X	/* Do something to get inetd to start up in.xtrekd */
+X	sp = getservbyname("xtrek", "udp");
+X	if (sp == (struct servent *) NULL) {
+X		goto normal;
+X	}
+X	udp_sin = sin;
+X	udp_sin.sin_port = sp->s_port;
+X	s = socket(AF_INET, SOCK_DGRAM, 0);
+X	if (s < 0) {
+X		fprintf(stderr, "Can't open xtrek datagram socket\n");
+X		perror("socket");
+X		exit(-1);
+X	}
+X	if (connect(s, (struct sockaddr *) &udp_sin, sizeof (udp_sin)) < 0) {
+X		perror("connect udp");
+X		(void) close(s);
+X		exit(-1);
+X	}
+X	send(s, "WAKEUP!\015\012", 9, 0);
+X	close(s);
+Xnormal:
+X	sleep(5);		/* give the daemon a chance to start */
+X#endif
+X	s = socket(AF_INET, SOCK_STREAM, 0);
+X	if (s < 0) {
+X		perror("socket");
+X		exit(-1);
+X	}
+X	if (connect(s, (struct sockaddr *) &sin, sizeof (sin)) < 0) {
+X		perror("connect");
+X		(void) close(s);
+X		exit(-1);
+X	}
+X	rval = 0;
+X	if (setjmp(sdied) == 0) {
+X		if (qmode)
+X			rval = query(s, qmode);
+X		else
+X			rval = startup(s, display, pwent->pw_name, shipname, copilot);
+X	}
+X	exit(rval);
+X}
+X
+Xquery(s, mode)
+Xregister int	s, mode;
+X{
+X	char	buf[80];
+X	int	n = 1;
+X	int	tcount[4];
+X	int	rval;
+X
+X	switch (mode) {
+X		case 2:		sprintf(buf, "RScore?");	break;
+X		case 3:		sprintf(buf, "Players?");	break;
+X		case 4:		sprintf(buf, "LScore?");	break;
+X		default:	sprintf(buf, "Query?");
+X	}
+X	write(s, buf, strlen(buf));
+X	write(s, "\015\012", 2);
+X	fflush(stdout);
+X	while ((n = read(s, buf, sizeof buf)) >= 0) {
+X		if (n <= 0) {
+X			write(s, "DONE\n", 5);	/* Does this cause SIGPIPE? */
+X			/* No, I think it causes read() above to return -1 */
+X			sleep(1);
+X		} else {
+X			if (mode == 1) {
+X				if (sscanf(buf, "F: %d, R: %d, K: %d, O: %d",
+X				 &tcount[0], &tcount[1], &tcount[2], &tcount[3]) != 4) {
+X					if (isatty(fileno(stdout)))
+X						printf("Bad Information\n");
+X					return(-1);
+X				} else {
+X					if (isatty(fileno(stdout)))
+X					   printf("Federation: %d, Romulan: %d, Klingon: %d, Orion: %d\n",
+X					    tcount[0], tcount[1], tcount[2], tcount[3]);
+X					rval = 0;
+X					if (tcount[0] > 0) rval += (1<<3);
+X					if (tcount[1] > 0) rval += (1<<2);
+X					if (tcount[2] > 0) rval += (1<<1);
+X					if (tcount[3] > 0) rval += (1<<0);
+X					return(rval);
+X				}
+X			} else {
+X				write(fileno(stdout), buf, n);
+X			}
+X		}
+X	}
+X	return 0;
+X}
+X
+Xstartup(s, d, l, sn, copilot)
+Xregister int	s, copilot;
+Xregister char	*d, *l, *sn;
+X{
+X	char	buf[80];
+X	int	n = 1;
+X
+X	sprintf(buf, "Display: %s Login: %s Shipname: %s Copilot: %x", d, l, sn, copilot);
+X	write(s, buf, strlen(buf));
+X	write(s, "\015\012", 2);
+X	fflush(stdout);
+X	while ((n = read(s, buf, sizeof buf)) >= 0) {
+X		if (n <= 0) {
+X			write(s, "DONE\n", 5);	/* Does this cause SIGPIPE? */
+X			/* No, I think it causes read() above to return -1 */
+X			sleep(1);
+X		} else
+X			write(fileno(stdout), buf, n);
+X	}
+X	return 0;
+X}
+X
+Xusage(p)
+Xregister char	*p;
+X{
+X	fprintf(stderr, "\nUsage: %s [-P|-q|-R|-S] [ -d display ] [ -s server ]\n\n", p);
+X	fprintf(stderr, " display defaults to DISPLAY env variable\n");
+X	fprintf(stderr, " server defaults to XTREKSERVER env variable or host 'xtrek-server'\n");
+X	fprintf(stderr, " -P  -> Query xtrek-server for current list of players\n");
+X	fprintf(stderr, " -q  -> Query xtrek-server for number of players\n");
+X	fprintf(stderr, " -R  -> Query xtrek-server for scores of presently playing players\n");
+X	fprintf(stderr, " -S  -> Query xtrek-server for a list of the Scorefile\n");
+X	exit(-1);
+X}
+END_OF_xtrek.c
+if test 6669 -ne `wc -c <xtrek.c`; then
+    echo shar: \"xtrek.c\" unpacked with wrong size!
+fi
+# end of overwriting check
+fi
+echo shar: End of archive 3 \(of 11\).
+cp /dev/null ark3isdone
+MISSING=""
+for I in 1 2 3 4 5 6 7 8 9 10 11 ; do
+    if test ! -f ark${I}isdone ; then
+	MISSING="${MISSING} ${I}"
+    fi
+done
+if test "${MISSING}" = "" ; then
+    echo You have unpacked all 11 archives.
+    rm -f ark[1-9]isdone ark[1-9][0-9]isdone
+else
+    echo You still need to unpack the following archives:
+    echo "        " ${MISSING}
+fi
+##  End of shell archive.
+exit 0

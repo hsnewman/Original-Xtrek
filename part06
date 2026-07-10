@@ -1,0 +1,1472 @@
+#! /bin/sh
+# This is a shell archive.  Remove anything before this line, then unpack
+# it by saving it into a file and typing "sh file".  To overwrite existing
+# If this archive is complete, you will see the following message at the end:
+#		"End of archive 6 (of 11)."
+#
+# Contents:
+#   doc rmove.c
+#
+# Wrapped by ddickey at cray.com on Thu Oct 11 11:43:54 1990
+#
+PATH=/bin:/usr/bin:/usr/ucb ; export PATH
+if test -f doc -a "${1}" != "-c" ; then
+  echo shar: Will not over-write existing file \"doc\"
+else
+echo shar: Extracting \"doc\" \(24026 characters\)
+sed "s/^X//" >doc <<'END_OF_doc'
+X.\"Xtrek -- a multiplayer, space shoot 'em up game.
+X.\"by Chris Guthrie
+X.\"with assistance of Ed James and playtesting of the XCF
+X.\"Copyright (c) 1986 Chris Guthrie
+X.\"static char sccsid[] = "@(#)doc	3.1";
+X.\"
+X.\" To view:  nroff -me <thisfile> | col | more
+X.\" To print:  psroff -me <thisfile>
+X
+X.sh 1 "Introduction"
+X.pp
+XWelcome to xtrek.
+XXtrek is the latest in a line of games based on Empire on the PLATO
+Xsystem.
+XMost of the ideas are stolen from the unix game
+X.i Trek83
+Xby David Davis and Chris Guthrie and the VMS game
+X.i Conquest
+Xby Jef Poskanzer and Craig Leres.
+XXtrek is a multi-player, real-time game which uses System V
+Xshared memory segments.
+XIt currently runs under Ultrix 2.0, Suns 3's running 3.2,
+Xand HP 320 systems running HP-UX 5.2.
+XSince the game uses shared memory for communications,
+Xthe daemon and
+Xplayer processes must be run on an an appropriate host.
+XHowever, the player program,
+X.i xtrek,
+Xthrows an X window up on any workstation running X.
+XPlease send any ideas/comments to chris at ic.berkeley.edu.
+X
+X.sh 1 "The Basic Idea"
+X.pp
+XWhen you play Xtrek, you enter a galaxy as one of four competing
+Xraces.
+XYou have a warship at your command.
+XThe galaxy contains forty planets which start divided evenly between
+Xthe four teams.
+XThe eventual goal of the game is to conquer the other teams' planets
+Xand protect your own.
+XUsually this will involve frequently destroying other players'
+Xships while avoiding their efforts to destroy yours.
+X
+X.sh 1 "Starting the Game"
+X.pp
+XTo enter the game type
+X.b "xtrek monitor:0"
+Xmuch like any X tool.
+XThe program will use the $DISPLAY variable in your environment if
+Xit is set.
+XIf there is room in the game, you will see an entry window which may
+Xcontain some random status information and a choice of teams.
+XClick a mouse button in the box of the team you wish to join.
+XIn terms of ship and planet abilities, all teams are identical.
+XAssuming everything is working properly (including xhosts) you
+Xwill be placed in the game.
+X
+X.sh 1 "The Display"
+X.pp
+XWhen you start the game, you are given five or six windows.
+XThe big left window is the local view from your ship.
+XYou will see a number of objects in it.
+XFirst, your ship will always appear the center of the window.
+XOther ships will look like yours except that each
+Xteam has a different ship design.
+XOn color workstations, each team also has a different color.
+XThe small hex character to the right of the ship represents
+Xthe player number.
+XRound objects with names on them are planets.
+XThey also are the color of their owning team.
+XSmall dots on the screen are torpedos.
+XYou will come to recognize these after they kill you a few
+Xtimes.
+XEnemy torpedoes are a small cross while friendly torpedoes are a small dot.
+XFriendly torpedoes will not explode if they hit you.
+XSmall circles are exploding torpedoes.
+XLines between ships are phaser shots which hit.
+XLines from a ship into space are phaser shots which miss.
+X
+X.pp
+XThe large window on the right is a map of the whole galaxy.
+XOnly ships and planets appear on it.
+XShips are just a player number (in hex) and team letter.
+X
+X.pp
+XDirectly below the galaxy window is a small window which
+Xwill occasionally contain warning messages like "Not enough
+Xfuel to fire torp."
+XYou will probably be killed shortly after this particular message.
+X
+X.pp
+XBelow the warning window is a message window.  This window
+Xwill be described later.
+X
+X.pp
+XThe small window on the left side is your status window.  It's
+Xcontents will also be described later.
+X
+X.sh 1 "User Interface"
+X.pp
+XThe mouse is the most important interface.
+XWhenever the game needs a direction -- to turn your ship, for instance --
+Xit will use the mouse's position relative to your ship, in either large
+Xwindow.
+XTorpedos and phasers will be fired toward the mouse's cursor, and
+Xyour ship will turn in the direction of the cursor when
+Xappropriate keys are hit.
+XCommands are issued through the keyboard and mouse
+Xbuttons.
+X
+X.sh 1 "Quick Instructions for Beginning Players"
+X.pp
+XSince no normal computer user will want to read the rest
+Xof this document, the following is a quick explanation of
+Xcombat.  Try it for awhile, then come back and search the
+Xdocument for more features.
+X
+X.sh 2 "Help Window"
+X.pp
+XTyping 'h' will pop up a help window below the normal window.
+XThe help window lists commands you can type.
+XIt's useful for small problems like forgetting how to put
+Xyour shields up.
+XTyping 'h' again will get rid of it.
+X
+X.sh 2 "Combat"
+X.pp
+XTo survive in combat, keep moving.  This is done by typing the
+Xnumber keys, 0-9.  Ships can fly at warp five indefinitely.
+XEngines will eventually overheat at higher speeds.  Turning
+Xis easier at low speeds.  Particularly good is warp three or
+Xfour.  You turn by pointing your mouse in the direction you
+Xwish to go, and typing the rightmost mouse key.  You will
+Xturn relative to whatever window you happen to have the mouse
+Xin.  When there is an opponent on the screen with you, you
+Xprobably want to start firing torpedoes at him.  Again, point the
+Xmouse where you want the torpedoes to go and push the leftmost
+Xmouse button.  If you get close enough, you might want to
+Xtry phasers.  Point the mouse directly at your opponent and
+Xpush the middle button.  A line will shoot out and you will
+Xget a report on your damage, if you hit.
+XAs a default, you will be hostile towards all other teams.
+XThis can be changed later.
+X
+X.pp
+XTorpedos that hit each do thirty points of damage to the
+Xtarget.  Damage first comes off of shields, and when those
+Xreach zero, damage comes directly off the damage stat.  When
+Xyour damage hits 100, your ship explodes and your opponent
+Xgets credit for killing you.  You can repair damage by going
+Xinto repair mode (type 'R') but it will also leave you a
+Xsitting duck for other players.  When you finish repairing,
+Xuse 'u' or '+' to put your shields back up.
+X
+X.pp
+XFinally, if you get tired of playing, you can quit by typing
+X.b Q
+Xand waiting to self-destruct.
+XIn the entry window, click the mouse in the 'quit' window to
+Xexit the game.
+X
+X.sh 1 "Status Line"
+X.pp
+XNow for some of the more technical details.
+XThe status line appears below the local window
+Xand contains the following useful information:
+X
+X.sh 2 "Flags -- ship status flags"
+X.pp
+XVarious flags tell the player about his ship.
+X.(l
+XS     -- Shields up
+X[GYR] -- Alert status
+XL     -- Locked onto a target
+XR     -- In Repair mode
+XB     -- Bombing a planet
+XO     -- Orbiting a planet
+XC     -- Cloaked
+XW     -- Weapons overheated
+XE     -- Engines overheated
+Xu     -- Beaming up armies
+Xd     -- Beaming down armies
+XP     -- Copilot permitted
+X.)l
+X
+X.sh 2 "speed - ship's speed"
+X.pp
+XThis is the speed your ship is currently travelling.
+XShips move between warps 0 and 9.
+X
+X.sh 2 "dam - current damage"
+X.pp
+XThis is how much damage your ship has taken.
+XIf it gets over 100, you die.
+XDamage repairs slowly if shields are down, faster if
+Xship is in repair mode.
+X
+X.sh 2 "shd - current shields"
+X.pp
+XShields start out at 100 and take damage when they are up.
+XWhen they hit 0, damage will come off your damage rating.
+XThey repair faster than real damage.
+X
+X.sh 2 "torps -- number of torpedoes launched"
+X.pp
+XEach player is limited to twelve torpedoes flying at any given
+Xtime.
+XThis is a count of the torpedoes you currently have in the air.
+X
+X.sh 2 "armies -- armies on board"
+X.pp
+XThis is a count of the number of armies you have on your ship.
+XYour ship can carry two times your current number of kills.
+XThe maximum number of armies it can carry is ten.
+X
+X.sh 2 "fuel -- how much fuel you have left"
+X.pp
+XWeapons and engines take fuel to run.
+XThis is a count of the amount of fuel left on the ship.
+XFuel regenerates slowly in space, but faster when orbiting a fuel planet.
+X
+X.sh 2 "wtemp -- weapons temperature"
+X.pp
+XUsing weapons drives up this stat.
+XIf it goes over 100, there is a good chance your weapons will
+Xfreeze up for a random amount of time.
+XThe temperature drops over time.
+X
+X.sh 2 "etemp -- engine temperature"
+X.pp
+XRunning your engines at speeds over five cause engine temperature
+Xto climb.
+XRunning at less than five causes them to cool.
+XOver 100, engines can freeze up for a random amount of time.
+X
+X.sh 1 "The Commands"
+X.pp
+XThese are the various key and button commands in the game.
+XThey are not currently remappable other than through the XKeyMap
+Xfunction.
+X
+X.sh 2 "0-9 Ship's speed"
+X.pp
+XThe numbers zero through nine set your ship's speed.
+XIt takes time for your ship to accelerate or decelerate to the desired
+Xspeed.
+XDamaged ships can't use higher speeds.
+XWhen engines freeze, you can't set speed.
+XSetting speed breaks you out of a planet's orbit.
+X
+X.sh 2 "k - set course"
+X.pp
+XThe letter
+X.b k
+Xor the right mouse button will set your course towards the current
+Xmouse position.
+XTurning towards the desired course can take time, depending on
+Xyour current speed and damage.
+X
+X.sh 2 "t - launch torpedo"
+X.pp
+XThe letter
+X.b t
+Xor the left mouse button will launch a torpedo towards the current
+Xmouse position if you have enough fuel and less than twelve torpedoes
+Xcurrently out.
+XTorpedos travel at warp twelve and do thirty points of
+Xdamage when they hit someone.
+XYou cannot be hurt by your own torpedoes.
+XTorpedos tend to wobble a bit in flight so they won't always
+Xgo straight in the direction you want them to.
+XThe effect does create nice clouds of them, though.
+X
+X.sh 2 "p - fire phaser"
+X.pp
+XThe letter
+X.b p
+Xand the middle mouse button will fire your phasers towards the current
+Xmouse position if you have enough fuel.
+XYou may only fire phasers once per second.
+XThey cost a good deal of fuel.
+XIf they hit someone, they will do 0-100 points of damage depending on the
+Xrange.
+X
+X.sh 2 "d - detonate other torpedoes"
+X.pp
+XThis command will detonate other torpedoes near you, doing less
+Xthan maximum damage to you.
+X
+X.sh 2 "D - detonate your own torpedoes"
+X.pp
+XThis will turn your own torpedoes off (if you've missed)
+Xso that you can fire new ones.
+X
+X.sh 2 "+ - put shields up"
+X.pp
+XThis key will put your shields up.
+XRaised shields will take damage.
+X
+X.sh 2 "-- - put shields down"
+X.pp
+XThis key will put your shields down.
+XAll damage will go directly to your damage stat.
+X
+X.sh 2 "u - toggle shields"
+X.pp
+XThis key will toggle your shields up and down.
+X
+X.sh 2 "R - repair damage"
+X.pp
+XYour ship must be going warp zero to repair.  Hitting this key will
+Xstop your ship and start repairing.  Your shields are down when you
+Xare repairing and you cannot fire weapons.  In a nutshell, you are
+Xa sitting duck.  Putting your shields up or moving is the best
+Xway to get out of repair mode.
+XIf your ship is orbiting a friendly repair planet, damage will repair
+Xat a faster rate.
+X
+X.sh 2 "o - orbit a planet"
+X.pp
+XIf you are near a planet and going warp two or less this will
+Xput in orbit around it.
+XYou must be in orbit around a planet to bomb it, beam armies up
+Xor down to it, repair at it, or get fuel from it.
+XEnemy planets will damage you if you get near them.
+XSetting a speed will break out of orbit.
+X
+X.sh 2 "b - bomb a planet"
+X.pp
+XIf an enemy planet has more than four armies, you can bomb
+Xthem.
+XWith four or less armies, you must beam down armies
+Xto defeat them.
+XYour shields will go down to bomb, and you will
+Xtake damage from the planet.
+XYou get kills for the armies destroyed.
+X
+X.sh 2 "z - beam up armies"
+X.pp
+XIf the planet you are orbiting is owned by your team and
+Xhas more than four armies, you can beam
+Xthem to your ship to carry to other planets.
+XYou must be orbiting to beam up armies.
+XThe number of armies you can carry is equal to your kills * 2.
+XYou can never carry more than ten armies.
+X
+X.sh 2 "x - beam down armies"
+X.pp
+XThis command will beam the armies that are on your ship down to a
+Xplanet you are orbiting.
+XIf it is an hostile planet, you will kill his armies.
+XIf all enemy armies are killed and you land an army, you take the planet
+Xfor your team.
+XIf it is a planet you own, you will simply add to the armies
+Xalready there.
+XIf it is a friendly planet, owned by other teams, you cannot
+Xbeam armies down.
+X
+X.sh 2 "L - get player list"
+X.pp
+XThis gives you a quick list of other players.
+XTo remove this window, just type 'L' again.
+X
+X.sh 2 "P - get planet list"
+X.pp
+XThis gives you a list of planets.
+XYou get information only on planets which your team
+Xowns or has previously orbited.  To remove this window,
+Xjust type 'P' again.
+X
+X.sh 2 "i - info on object"
+X.pp
+XThis will pop up a window near the mouse cursor which contains
+Xinformation about the nearest object (planet or ship).
+XTo remove this window, just type 'i' again.
+X
+X.sh 2 "l - lock onto an object"
+X.pp
+XThis will lock your ship onto the object nearest the mouse cursor.
+XIf you are moving you will turn towards the object your are locked
+Xonto.
+XIf it is a planet, you will automatically go into orbit around it.
+XIf it is another player, your course will constantly be adjusted if
+Xhe is moving.
+XTo break the lock, just set course normally.
+XYou cannot lock onto cloaked ships.
+X
+X.sh 2 "C - throw a coup"
+X.pp
+XSometimes players will discover that all their planets have been
+Xtaken, or have been left with no armies.
+XIn order to allow the team some form of return you can hold a coup
+Xon your home planet assuming that the following criterion are met:
+X.(l
+XYour team must have armies on no planets.
+XYou must have more than one kill.
+XThere must be less than five enemy armies (or zero friendly, should
+Xyou still own it) on your home planet.
+XYou must be orbiting your home planet.
+X.)l
+XAfter the coup, the planet will have four of your armies on it.
+XAs they come back you can take over more of your occupied worlds.
+X
+XWhen your last planet is taken, you will have to wait from thirty
+Xminutes to an hour before you can have a coup.
+X
+X.sh 2 "? - repeat all of the previous messages"
+X.pp
+XMessage sending is detailed below.  This command allows you to
+Xreview the current set of them.
+X
+X.sh 2 "c - cloak your ship"
+X.pp
+XThis nifty command allows you to remain invisible on the local
+Xwindow of every player.  This would be nice except that you cannot
+Xfire weapons while cloaked, and you use more fuel.
+XFinally good players can shoot at you on the galaxy map window
+Xwhere you will appear as
+X.b "??."
+XTyping
+X.b 'c'
+Xagain will turn cloaking off.
+X
+X.sh 2 "@ - allow/disallow copilots"
+X.pp
+XThis feature allows more than one player to fly a ship.  It will
+Xbe discussed near the end of this document.
+X
+X.sh 2 "S - Toggle visual status window"
+X.pp
+XThis will turn a visually oriented status window on and off.
+X
+X.sh 2 "w - Set war status"
+X.pp
+XThis command will give you a window that you can use to declare
+Xwar and peace with other teams.  It will be fully detailed below.
+X
+X.sh 2 "* - Bring in a practice robot"
+X.pp
+XIf you are the only ship in the game, this command will send a
+Xpractice robot into the game.
+XThe robot will come in on your team, and be hostile towards you.
+XThese robots are not as deadly as the ones which pop up to defend planets.
+XHowever, you don't get any credit for killing them -- just practice.
+X
+X.sh 1 "Nitty Gritty Details"
+X.pp
+XThis section contains the details on certain features.
+X
+X.sh 2 "Planets and Armies"
+X.pp
+XPlanets are updated every minute.  There is a random chance
+Xthat the number of armies will increase.  There is also a random
+Xchance, that there will be a major die-off of armies.  This later
+Xevent is more likely on planets with many armies.
+XIf you have less than three armies on the planet, they will not
+Xgrow as fast.
+XPlanets with no armies are owned by the independent team and will
+Xhave no armies on them until someone beams one down.
+X
+X.pp
+XEnemy planets do damage based on the number of armies they have.
+XThis means planets with no armies do no damage.  Those with armies
+Xwill do (armies / 10) + 2 points of damage twice each second.
+X
+X.pp
+XThe teams' home planets and randomly, others, will provide
+Xfuel and repair services.  Obviously, this makes these planets
+Xparticularly valuable.  These planets are selected up when the galaxy
+Xis reset.
+X
+X.sh 2 "Messages"
+X.pp
+XMessages are sent both from the daemon and from other players.
+XThey appear in the message window at the bottom, right side of the display.
+XTo send messages, just put the mouse into the message window.
+XYou must type a character in that represents the recipient of your
+Xmessage.  This can be 'A' for everyone.  [FRKO] to send to all members
+Xof a given team.  [0-9abcdef] will send a message to an individual
+Xplayer.  When you've typed this in, it will map to a proper address
+Xand wait for you to type in some text.  When you type in a return,
+Xyour message is sent.
+XTyping an escape will abort the message in progress.
+X
+X.pp
+XNow obviously, the next question is, "What if someone starts shooting
+Xat me while I'm typing in my message?  Am I hosed?"
+XSimply move the mouse out of the window to defend yourself.  Messages
+Xare only dealt with if the mouse is in the window.  You can stop
+Xin the middle of the input.
+X
+X.sh 2 "Robots"
+X.pp
+XRobots are an attempt to allow/prevent certain things.  First, we want
+Xbeginning players to have some lousy competition so they can get some
+Xpractice without simply being targets for better players.  Secondly,
+Xwe want to make sure that taking over the galaxy is not a midnight
+Xwaltz.
+X
+X.pp
+XIn order to invite a robot into the game, players are advised
+Xto use the '*' command (described above) to bring in a practice
+Xrobot.
+XThese robots are relatively easy to kill.
+XThe second way to get a robot is to go into another team's space
+Xand bomb one of
+X.i their
+Xplanets.
+XA robot will promptly show up and kill you.
+XOr at least try to kill you.
+XThese defender robots are particularly nasty.
+XGood luck.
+X
+X.pp
+XRobots are very much like other players.  The only advantage they
+Xhave over other players is that they don't use fuel.  Otherwise,
+Xtheir torpedoes do the same damage.  They are also somewhat better shots.
+XTheir torpedoes don't wobble, and they never miss with their phasers.
+X
+X.sh 2 "War and Peace"
+X.pp
+XYou can declare war and peace with other teams.
+XThe greatest use of this is that you can use planets belonging
+Xto teams you are at peace with for fuel and repair.
+XIt also allows two teams to gang up on another without risking
+Xkilling each other.
+X
+X.pp
+XThere are three states a player can be in versus any other team:
+XPeace, Hostile, and War.  Being at War is irrevocable.  You cannot
+Xchange to any other state until you reenter the game.  You get to
+Xwar when you are hostile to a team and you either bomb one of their
+Xplanets, damage one of their players with weapons, or beam armies
+Xdown to one of their planets.
+X
+X.pp
+XIf you are hostile towards a team, your weapons will hurt all members of
+Xthat team (whether or not they are at peace with you).  As soon as
+Xyou hurt them, you will be at war.
+X
+X.pp
+XIf you are peaceful towards a team, your weapons will only hurt members
+Xof that team who are not peaceful towards you.  In other words, two
+Xplayers who are at peace towards each other cannot fight each other.
+X
+X.pp
+XPlayers default to being at peace with their own team and hostile
+Xtowards all the others.  Obviously, they can declare war on their own
+Xteam.
+X
+X.pp
+XTo change your settings, type 'w' and a war window will pop up.
+XClick the mouse in the boxes of the teams you want to change.
+XClick in "re-program" to save the results.  Teams will be notified
+Xof your changes.  Finally, there is a ten second delay to declare
+Xhostility towards another team so don't get too close while you make
+Xthe changes.
+X
+X.pp
+XThe easiest way to know if someone near you is hostile is to use
+Xthe alert status described below.  Info on a player will tell you
+Xtheir status towards you.
+X
+X.sh 2 "Weapons"
+X.pp
+XTorpedos move at warp twelve and have a random life of three to five
+Xseconds.  They tend to wobble a bit, so their accuracy goes down
+Xat longer ranges.  Torpedoes will detonate and do full damage if
+Xthey get close to a ship.  They will do less damage to objects at a
+Xslightly longer distance.  Torpedos will not be detonated by a non-hostile
+Xplayer, but they will do damage if something causes them to explode.
+X
+X.pp
+XWhen exploding, torpedoes can damage everyone who is near them except
+Xthe person who launched them.  Thus it is possible to kill your own
+Xteammates and people you are at peace with.
+X
+X.pp
+XPhasers must be within about 10 degrees of their target to hit.
+XPhasers that hit will maintain a line between the two ships.
+XOnes that miss will stick out to nowhere and look stupid.
+XAll phasers cost a good deal of fuel.  It takes one second
+Xto recharge your phasers for another shot.
+XYour phasers will affect teams you are at war with, or those
+Xwho are at war with you.
+X
+X.pp
+XShips that explode cause 100 points of damage with about the same
+Xrange as a torpedo.  Don't get too near one.
+X
+X.sh 2 "The Galaxy"
+X.pp
+XYou will bounce off the edge of the galaxy if you run into it.
+XTorpedos explode if they hit it.
+X
+X.sh 2 "Planet information"
+X.pp
+XYou can get information about any planet your team has orbited.
+XHowever, if the planet is taken by any other team, you will
+Xlose information about the planet until it is reorbited.
+X
+X.sh 2 "Ship's Status"
+X.pp
+XYour ship's alert status will tell you how close you are to hostile
+Xships.  Yellow alert represents about two screens distance.  Red
+Xalert means that the enemy is on your local screen (even if cloaked).
+XBesides the status line, the border of your window tells you what
+Xyour alert status is.  This also works for the border of the icon.
+XThe border patterns are discussed below.
+X
+X.sh 2 "Xdefaults and options"
+X.pp
+XYou can put the following options into your .Xdefaults
+X.(l
+Xxtrek.boldfont:		6x10b
+Xxtrek.font:		6x10
+Xxtrek.name:		DragonSlayer
+Xxtrek.reverseVideo:	off
+Xxtrek.showShields:	on
+Xxtrek.showStats:		on
+Xxtrek.stats.geometry:	+0+655
+Xxtrek.GAlertPattern:	0xf
+Xxtrek.YAlertPattern:	0xa 0x5
+Xxtrek.RAlertPattern:	0x0f 0x0f 0x0f 0x0f 0xf0 0xf0 0xf0 0xf0
+Xxtrek.ralert:		red
+Xxtrek.yalert:		yellow
+Xxtrek.galert:		green
+Xxtrek.border:		blue
+Xxtrek.background:	black
+Xxtrek.text:		white
+Xxtrek.fed:		yellow
+Xxtrek.rom:		red
+Xxtrek.kli:		green
+Xxtrek.ori:		slate blue
+Xxtrek.warning:		red
+Xxtrek.unknown:		light grey
+Xxtrek.me:		white
+X.)l
+X
+X.sh 3 "Fonts"
+X.pp
+XThese options allow you to change fonts used in the game.
+XOur advice: "Don't."
+X
+X.sh 3 "name"
+X.pp
+XThis is your playername.
+X
+X.sh 3 "reversevideo"
+X.pp
+XOn black and white monitors this can ease eye-strain.
+X
+X.sh 3 "showShields"
+X.pp
+XThis causes the shields of you and other players to appear
+Xas a circle around your ship when they are up.
+X
+X.sh 3 "showStats"
+X.pp
+XThis option will put up a visual status window above your display.
+XSome players find this easier to read than numbers.
+XThe stats.geometry uses standard X syntax for a screen position.
+X
+X.sh 3 "Alert Patterns"
+X.pp
+XThese patterns are useful for showing your current alert status
+Xbased on the border pattern.  It is used for black and white
+Xmonitors only.
+XThe alert colors are used for color monitors.  I think changing
+Xthem would be silly.
+X
+X.sh 3 "The remaining color definitions"
+X.pp
+XThese options allow you to set colors on various objects
+Xso you can get much more information from your display.
+XObviously, these only matter for color monitors.
+X
+X.sh 2 "Other programs related to xtrek"
+X.pp
+XThere are few other programs that come with xtrek that
+Xhave some use in the game.  They are described below.
+X
+X.sh 3 "Copilot"
+X.pp
+XThis program, started with the command:
+X
+X.ti 1i
+X.b "xtrek -c pno monitor:0"
+X
+Xwill allow you to fly a ship with player number pno
+Xif he so permits.  This command is pretty robust.
+XTwo players flying a ship can be very deadly.
+XTypically, one steers and one shoots.
+X
+X.sh 3 "scores"
+X.pp
+XXtrek does, in fact keep some statistics around in the
+Xfile .scores.  Scores can be used to print this information out.
+XIt obviously should have been built into xtrek itself.
+X
+X.sh 3 "robot"
+X.pp
+XThis is the program xtrek uses to send robots into the game.
+XRobots come with gobs of command line options, but you'll have
+Xto look at the code to see what they do.
+X
+X.sh 3 "watch"
+X.pp
+XLike copilot, watch mode can be entered directly from
+Xxtrek using the command:
+X
+X.ti 1i
+X.b "xtrek -w pno monitor:0"
+X
+XThis allows you to watch all the actions taken by the particular
+Xplayer (without him knowing it).
+XYou can change the player being viewed by clicking on a new
+Xplayer.
+END_OF_doc
+if test 24026 -ne `wc -c <doc`; then
+    echo shar: \"doc\" unpacked with wrong size!
+fi
+# end of overwriting check
+fi
+if test -f rmove.c -a "${1}" != "-c" ; then
+  echo shar: Will not over-write existing file \"rmove.c\"
+else
+echo shar: Extracting \"rmove.c\" \(19425 characters\)
+sed "s/^X//" >rmove.c <<'END_OF_rmove.c'
+Xstatic char sccsid[] = "@(#)rmove.c	3.1";
+X#ifndef lint
+Xstatic char *rcsid_rmove_c = "$Header: /uraid2/riedl/src/xceltrek/RCS/rmove.c,v 1.1 88/04/18 16:10:39 riedl Exp Locker: riedl $";
+X#endif	lint
+X/* Copyright (c) 1986 	Chris Guthrie */
+X
+X#include <X11/Xlib.h>
+X#include <stdio.h>
+X#include "defs.h"
+X#include "data.h"
+X
+X#define	SIZEOF(s)		(sizeof (s) / sizeof (*(s)))
+X#define AVOID_TIME		4
+X#define	AVOID_CLICKS		200
+X
+X#define STAY	0x1
+X#define RUN	0x2
+X#define ATTACK	0x3
+X#define REPAIR	0x4
+X#define AVOID	0x5
+X
+X#define NORMALIZE(d) 		((((d) % 256) + 256) % 256)
+X
+X#define	E_TSHOT		0x02
+X#define	E_PSHOT		0x04
+X#define	E_TEAMRED	0x08
+X#define	E_TEAMYELLOW	0x10
+X#define	E_PLANETPROT	0x20
+X
+Xstruct Enemy {
+X	int	e_info;
+X	int	e_dist;
+X	unsigned char	e_course;	/* course to enemy */
+X	unsigned char	e_pcourse;	/* course to "protected" team member */
+X	unsigned char	e_tcourse;	/* torpedo intercept course to enemy */
+X	int	e_planetprot;
+X	unsigned int	e_flags;
+X};
+X#define	NO_PLAYERS	(-1)
+X
+Xextern int debug;
+Xextern int playerchange;
+Xextern int nplayers;
+Xextern int nrobots;
+X
+Xextern long isin[], icos[];
+Xextern unsigned char iatan2();
+X
+Xdouble hypot();
+Xextern unsigned char newcourse();
+X
+Xrmove(p)
+Xstruct player	*p;
+X{
+X    register int i;
+X    register int burst;
+X    register int numHits, tDir;
+X    int		avDir;
+X    extern struct Enemy *get_nearest();
+X    struct Enemy *enemy_buf;
+X    struct player *enemy;
+X    int		no_cloak;
+X    static int	avoid[2] = { -32, 32 };
+X
+X    if (p->p_ship->s_status == EXPLODE) {
+X	/* Don't bother...besides, it can't! */
+X	/* There would be no ship to do anything with, just a few */
+X	/* explosion glyphs lying around on people's screens. */
+X	return;
+X    }
+X    /* Find an enemy */
+X    enemy_buf = get_nearest(p);
+X    if (enemy_buf == (struct Enemy *) NO_PLAYERS) {
+X	/* No more enemies */
+X	if (do_repair(p)) {
+X	    return;
+X	}
+X	p->p_ship->s_flags &= ~SFPLANETPROT;
+X	p->p_ship->s_planetprot = 0;
+X	go_home(p);
+X	if (debug > 1)
+X	    fprintf(stderr, "%d) No players in game.\n", p->p_ship->s_no);
+X	return;
+X    } else if (enemy_buf == 0) {	 /* no one hostile */
+X	if (debug > 1)
+X	    fprintf(stderr, "%d) No hostile players in game.\n", p->p_ship->s_no);
+X	if (do_repair(p)) {
+X	    return;
+X	}
+X	if (p->p_ship->s_flags & SFPLANETPROT) {
+X		go_planet(p, &planets[p->p_ship->s_planetprot], p->p_ship->s_maxspeed / 2);
+X	} else {
+X		go_home(p);
+X	}
+X	return;
+X    } else {
+X	enemy = &players[enemy_buf->e_info];
+X	if (enemy_buf->e_flags & (E_TEAMYELLOW|E_TEAMRED)) {
+X		/* Someone to kill or protect */
+X		p->p_ship->s_flags &= ~SFPLANETPROT;
+X		p->p_ship->s_planetprot = 0;
+X		if (debug > 1)
+X		    fprintf(stderr, "%d) noticed %d, dist %d\n", p->p_ship->s_no, enemy->p_ship->s_no, enemy_buf->e_dist);
+X	} else if (enemy_buf->e_flags & E_PLANETPROT) {
+X		/* A Planet to protect */
+X		if (debug > 1)
+X		    fprintf(stderr, "%d) Protecting Planet %d\n", p->p_ship->s_no, enemy_buf->e_planetprot);
+X		p->p_ship->s_flags |= SFPLANETPROT;
+X		p->p_ship->s_planetprot = enemy_buf->e_planetprot;
+X		go_planet(p, &planets[enemy_buf->e_planetprot], p->p_ship->s_maxspeed - 2);
+X	}
+X    }
+X
+X/* Algorithm:
+X** We have an enemy.
+X** First priority: shoot at target in range.
+X** Second: Dodge torps.
+X** Third: Get away if we are damaged.
+X** Fourth: repair.
+X** Fifth: defend team members.
+X** Sixth: attack.
+X*/
+X
+X/*
+X** If we are a practice robot, we will do all but the second.  One
+X** will be modified to shoot poorly and not use phasers.
+X**/
+X    /* Fire weapons!!! */
+X    /*
+X    ** get_nearest() has already determined if torpedoes and phasers
+X    ** will hit.  It has also determined the courses which torps and
+X    ** phasers should be fired.  If so we will go ahead and shoot here.
+X    ** We will lose repair and cloaking for the rest of this interrupt.
+X    ** if we fire here.
+X    */
+X
+X    if (!(p->p_flags & (PFRHARD|PFRVHARD))) {
+X	/* Practice robot */
+X	no_cloak = 1;
+X	if (enemy_buf->e_flags & E_TSHOT) {
+X	    if (debug > 1)
+X		fprintf(stderr, "%d) firing torps\n", p->p_ship->s_no);
+X	    for (burst = 0; (burst < 2) && (p->p_ship->s_ntorp < MAXTORP); burst++) {
+X		/* Bad shot.. */
+X		ntorp(p, enemy_buf->e_tcourse + ((random() % 3) - 1), TMOVE);
+X	    }
+X	}
+X    } else if (!(p->p_flags & PFRVHARD)) {
+X	/* Hard robot */
+X	no_cloak = 0;
+X	if (enemy_buf->e_flags & E_TSHOT) {
+X	    if (debug > 1)
+X		fprintf(stderr, "%d) firing torps\n", p->p_ship->s_no);
+X	    for (burst = 0; (burst < 1) && (p->p_ship->s_ntorp < MAXTORP); burst++) {
+X		repair_off(p);
+X		cloak_off(p);
+X		ntorp(p, enemy_buf->e_tcourse, TMOVE);
+X		no_cloak++;
+X	    }
+X	}
+X	if (enemy_buf->e_flags & E_PSHOT) {
+X	    if (debug > 1)
+X		fprintf(stderr, "%d) phaser firing\n", p->p_ship->s_no);
+X	    no_cloak++;
+X	    repair_off(p);
+X	    cloak_off(p);
+X	    /* Bad shot.. */
+X	    phaser(p, enemy_buf->e_course + ((random() % 5) - 1));
+X	}
+X    } else {
+X	/* Very Hard Robot */
+X	no_cloak = 0;
+X	if (enemy_buf->e_flags & E_TSHOT) {
+X	    if (debug > 1)
+X		fprintf(stderr, "%d) firing torps\n", p->p_ship->s_no);
+X	    for (burst = 0; (burst < 2) && (p->p_ship->s_ntorp < MAXTORP); burst++) {
+X		repair_off(p);
+X		cloak_off(p);
+X		ntorp(p, enemy_buf->e_tcourse, TSTRAIGHT);
+X		no_cloak++;
+X	    }
+X	}
+X	if (enemy_buf->e_flags & E_PSHOT) {
+X	    if (debug > 1)
+X		fprintf(stderr, "%d) phaser firing\n", p->p_ship->s_no);
+X	    no_cloak++;
+X	    repair_off(p);
+X	    cloak_off(p);
+X	    phaser(p, enemy_buf->e_course);
+X	}
+X    }
+X
+X    /* Avoid torps */
+X    /*
+X    ** This section of code allows robots to avoid torps.
+X    ** Within a specific range they will check to see if
+X    ** any of the 'closest' enemies torps will hit them.
+X    ** If so, they will evade for four updates.
+X    ** Evading is all they will do for this round, other than shooting.
+X    */
+X
+X    if ((enemy_buf->e_flags & (E_TEAMRED|E_TEAMYELLOW|E_PLANETPROT)) == 0 && (p->p_flags & PFRVHARD)) {
+X	if (enemy->p_ship->s_ntorp < 5) {
+X	    if ((enemy_buf->e_dist < 15000) || (p->p_ship->s_timer > 0)) {
+X		numHits = projectDamage(p, enemy->p_ship->s_no, &avDir);
+X		if (debug > 1) {
+X		    fprintf(stderr, "%d hits expected from %d from dir = %d\n",
+X			    numHits, enemy->p_ship->s_no, avDir);
+X		}
+X		if (numHits == 0) {
+X		    if (--p->p_ship->s_timer > 0) {	/* we may still be avoiding */
+X			if (angdist(p->p_ship->s_desdir, p->p_ship->s_dir) > 64)
+X			    p->p_ship->s_desspeed = 3;
+X			else
+X			    p->p_ship->s_desspeed = 5;
+X			return;
+X		    }
+X		} else {
+X		    /*
+X		     * Actually avoid Torps
+X		     */
+X		    p->p_ship->s_timer = AVOID_TIME;
+X		    tDir = avDir - p->p_ship->s_dir;
+X		    /* put into 0->255 range */
+X		    tDir = NORMALIZE(tDir);
+X		    if (debug > 1)
+X			fprintf(stderr, "mydir = %d avDir = %d tDir = %d q = %d\n",
+X			    p->p_ship->s_dir, avDir, tDir, tDir / 64);
+X		    switch (tDir / 64) {
+X		    case 0:
+X		    case 1:
+X			    p->p_ship->s_desdir = NORMALIZE(avDir + 64);
+X			    break;
+X		    case 2:
+X		    case 3:
+X			    p->p_ship->s_desdir = NORMALIZE(avDir - 64);
+X			    break;
+X		    }
+X		    if (!no_cloak)
+X			cloak_on(p);
+X
+X		    if (angdist(p->p_ship->s_desdir, p->p_ship->s_dir) > 64)
+X			p->p_ship->s_desspeed = 3;
+X		    else
+X			p->p_ship->s_desspeed = 5;
+X
+X		    shield_up(p);
+X		    if (debug > 1)
+X			fprintf(stderr, "evading to dir = %d\n", p->p_ship->s_desdir);
+X		    return;
+X		}
+X	    }
+X	}
+X
+X	/*
+X	** Trying another scheme.
+X	** Robot will keep track of the number of torps a player has
+X	** launched.  If they are greater than say four, the robot will
+X	** veer off immediately.  Seems more humanlike to me.
+X	*/
+X
+X	else if (enemy_buf->e_dist < 15000) {
+X	    if (--p->p_ship->s_timer > 0) {	/* we may still be avoiding */
+X		if (angdist(p->p_ship->s_desdir, p->p_ship->s_dir) > 64)
+X		    p->p_ship->s_desspeed = 3;
+X		else
+X		    p->p_ship->s_desspeed = 5;
+X		return;
+X	    }
+X	    if (random() % 2) {
+X		p->p_ship->s_desdir = NORMALIZE(enemy_buf->e_course - 64);
+X		p->p_ship->s_timer = AVOID_TIME;
+X	    }
+X	    else {
+X		p->p_ship->s_desdir = NORMALIZE(enemy_buf->e_course + 64);
+X		p->p_ship->s_timer = AVOID_TIME;
+X	    }
+X	    if (angdist(p->p_ship->s_desdir, p->p_ship->s_dir) > 64)
+X		p->p_ship->s_desspeed = 3;
+X	    else
+X		p->p_ship->s_desspeed = 5;
+X	    shield_up(p);
+X	    return;
+X	}
+X    }
+X
+X    /* Run away */
+X    /*
+X    ** The robot has taken damage.  He will now attempt to run away from
+X    ** the closest player.  This obviously won't do him any good if there
+X    ** is another player in the direction he wants to go.
+X    ** Note that the robot will not run away if he dodged torps, above.
+X    ** The robot will lower his shields in hopes of repairing some damage.
+X    */
+X
+X    if ((enemy_buf->e_flags & (E_TEAMRED|E_TEAMYELLOW|E_PLANETPROT)) == 0 && (p->p_ship->s_damage > 0 && enemy_buf->e_dist < 13000)) {
+X	if (p->p_ship->s_etemp > 900)		/* 90% of 1000 */
+X	    p->p_ship->s_desspeed = 5;
+X	else
+X	    p->p_ship->s_desspeed = 6;
+X	if (!no_cloak)
+X	    cloak_on(p);
+X	repair_off(p);
+X	shield_down(p);
+X	p->p_ship->s_desdir = enemy_buf->e_course - 128;
+X	if (debug > 1)
+X	    fprintf(stderr, "%d(%d)(%d/%d) running from %c%d %16s damage (%d/%d) dist %d\n",
+X		p->p_ship->s_no,
+X		(int) p->p_ship->s_stats.st_kills,
+X		p->p_ship->s_damage,
+X		p->p_ship->s_shield,
+X		teamlet[enemy->p_ship->s_team],
+X		enemy->p_ship->s_no,
+X		enemy->p_login,
+X		enemy->p_ship->s_damage,
+X		enemy->p_ship->s_shield,
+X		enemy_buf->e_dist);
+X	return;
+X    }
+X
+X    /* Repair if necessary (we are safe) */
+X    /*
+X    ** The robot is safely away from players.  It can now repair in peace.
+X    ** It will try to do so now.
+X    */
+X
+X    if (do_repair(p)) {
+X	return;
+X    }
+X
+X    /* Defend. */
+X    if (enemy_buf->e_flags & (E_TEAMRED|E_TEAMYELLOW)) {
+X	if (enemy_buf->e_flags & E_TEAMRED) {
+X		set_course(p, enemy_buf->e_pcourse);
+X		cloak_off(p);
+X		set_speed(p, p->p_ship->s_maxspeed);
+X		if (debug > 1)
+X		    fprintf(stderr, "%d) Code RED, defending %s (%c%d)\n",
+X			p->p_ship->s_no, enemy->p_name,
+X			teamlet[enemy->p_ship->s_team], enemy->p_ship->s_no);
+X	} else if (enemy_buf->e_flags & E_TEAMYELLOW) {
+X		set_course(p, enemy_buf->e_pcourse);
+X		cloak_off(p);
+X		set_speed(p, p->p_ship->s_maxspeed - 2);
+X		if (debug > 1)
+X		    fprintf(stderr, "%d) Code YELLOW, defending %s (%c%d)\n",
+X			p->p_ship->s_no, enemy->p_name,
+X			teamlet[enemy->p_ship->s_team], enemy->p_ship->s_no);
+X	}
+X    }
+X
+X    /* Attack. */
+X    /*
+X    ** The robot has nothing to do.  It will check and see if the nearest
+X    ** enemy fits any of its criterion for attack.  If it does, the robot
+X    ** will speed in and deliver a punishing blow.  (Well, maybe)
+X    */
+X
+X    if ((enemy_buf->e_dist < 25000) || (p->p_flags & PFRHOSTILE)) {
+X	if ((!no_cloak) && (enemy_buf->e_dist < 10000))
+X	    cloak_on(p);
+X	p->p_ship->s_flags &= ~SFPLANETPROT;
+X	p->p_ship->s_planetprot = 0;
+X	shield_up(p);
+X	if (debug > 1)
+X	    fprintf(stderr, "%d(%d)(%d/%d) attacking %c%d %16s damage (%d/%d) dist %d\n",
+X		p->p_ship->s_no,
+X		(int) p->p_ship->s_stats.st_kills,
+X		p->p_ship->s_damage,
+X		p->p_ship->s_shield,
+X		teamlet[enemy->p_ship->s_team],
+X		enemy->p_ship->s_no,
+X		enemy->p_login,
+X		enemy->p_ship->s_damage,
+X		enemy->p_ship->s_shield,
+X		enemy_buf->e_dist);
+X
+X	if (enemy_buf->e_dist < 15000) {
+X	    p->p_ship->s_desdir = enemy_buf->e_course +
+X		    avoid[(p->p_ship->s_updates / AVOID_CLICKS) % SIZEOF(avoid)];
+X	    if (angdist(p->p_ship->s_desdir, p->p_ship->s_dir) > 64)
+X		p->p_ship->s_desspeed = 3;
+X	    else
+X		p->p_ship->s_desspeed = 4;
+X	} else {
+X	    p->p_ship->s_desdir = enemy_buf->e_course;
+X	    if (angdist(p->p_ship->s_desdir, p->p_ship->s_dir) > 64)
+X		p->p_ship->s_desspeed = 3;
+X	    else if (p->p_ship->s_etemp > 900)		/* 90% of 1000 */
+X		p->p_ship->s_desspeed = 5;
+X	    else
+X		p->p_ship->s_desspeed = 6;
+X	}
+X    } else {
+X	if ((enemy_buf->e_flags & (E_TEAMRED|E_TEAMYELLOW|E_PLANETPROT)) == 0)
+X		go_home(p);
+X    }
+X}
+X
+X/*
+X * Stupid Sun 3.2 tan routine calls matherr and *prints* a message if
+X * it returns something other than 1.
+X */
+Xint matherr()
+X{
+X  return(1);
+X}
+X
+X/* This function will send the robot back to it's home planet
+X   when it has nothing better to do.
+X*/
+Xgo_home(p)
+Xstruct player	*p;
+X{
+X	int x, y;
+X	double dx, dy;
+X	register struct planet	*l;
+X	register int		n;
+X
+X	/* Find the home planet... */
+X	for (n = 0, l = &pdata[n]; n < MAXPLANETS; n++, l++) {
+X		if ((l->pl_flags & PLHOME) && l->pl_owner == p->p_ship->s_team)
+X			break;
+X	}
+X
+X	if (n < MAXPLANETS) {
+X		l = &planets[n];	/* switch to current info */
+X		x = l->pl_x;
+X		y = l->pl_y;
+X		dx = x - p->p_ship->s_x;
+X		dy = y - p->p_ship->s_y;
+X		go_planet(p, l, (hypot(dx, dy) / 10000) + 1);
+X	}
+X}
+X
+X/* This function will send the robot to a specified planet
+X   to protect it from bombing & beaming.
+X*/
+Xgo_planet(p, l, s)
+Xstruct player	*p;
+Xstruct planet	*l;
+Xint		s;
+X{
+X    int x, y;
+X    double dx, dy;
+X
+X    x = l->pl_x;
+X    y = l->pl_y;
+X
+X    if ((ABS(x - p->p_ship->s_x) < ORBDIST) && (ABS(y - p->p_ship->s_y) < ORBDIST)) {
+X	p->p_ship->s_desspeed = 0;
+X	p->p_ship->s_flags |= SFORBIT;
+X	p->p_ship->s_planet = l->pl_no;
+X    } else {
+X	p->p_ship->s_flags &= ~SFORBIT;
+X	p->p_ship->s_desdir = newcourse(p, x, y);
+X	p->p_ship->s_desspeed = s;
+X    }
+X	if (p->p_ship->s_status != EXPLODE) {
+X		/* Self-destruct if there isn't anyone around but us robots... */
+X		/* or if we are not sticky */
+X		if (!(p->p_flags & PFRSTICKY) || (nplayers - nrobots) == 0) {
+X		    if (p->p_ship->s_explode == 0)
+X			p->p_ship->s_explode = p->p_ship->s_updates + RGIVEUPTIME;
+X		} else
+X			p->p_ship->s_explode = 0;
+X	}
+X}
+X
+XprojectDamage(p, eNum, dirP)
+Xstruct player	*p;
+X	int	*dirP;
+X{
+X	register int		i, j, numHits = 0, mx, my, tx, ty, dx, dy;
+X	long			tdx, tdy, mdx, mdy;
+X	register struct torp	*t;
+X
+X	*dirP = 0;
+X
+X/* XX Fix this like the tcourse computation above */
+X	for (i = 0, t = &torps[eNum * MAXTORP]; i < MAXTORP; i++, t++) {
+X		if (t->t_status == TFREE)
+X			continue;
+X		tx = t->t_x; ty = t->t_y;
+X		mx = p->p_ship->s_x; my = p->p_ship->s_y;
+X		tdx = (t->t_speed * icos[t->t_dir] * WARP1) >> TRIGSCALE;
+X		tdy = (t->t_speed * isin[t->t_dir] * WARP1) >> TRIGSCALE;
+X		mdx = (p->p_ship->s_speed * icos[p->p_ship->s_dir] * WARP1) >> TRIGSCALE;
+X		mdy = (p->p_ship->s_speed * isin[p->p_ship->s_dir] * WARP1) >> TRIGSCALE;
+X		for (j = t->t_fuse; j > 0; j--) {
+X			tx += tdx; ty += tdy;
+X			mx += mdx; my += mdy;
+X			dx = tx - mx; dy = ty - my;
+X			if (ABS(dx) < EXPDIST && ABS(dy) < EXPDIST) {
+X				numHits++;
+X				*dirP += t->t_dir;
+X				break;
+X			}
+X		}
+X
+X	}
+X	if (numHits > 0)
+X		*dirP /= numHits;
+X	return (numHits);
+X}
+X
+Xunsigned char
+Xrgetcourse(p, x, y)
+Xstruct player	*p;
+Xint	x, y;
+X{
+X	return(iatan2(x - p->p_ship->s_x, p->p_ship->s_y - y));
+X}
+X
+Xstatic struct Enemy ebuf;
+X
+Xstruct Enemy *
+Xget_nearest(p)
+Xregister struct player *p;
+X{
+X    register struct player *j;
+X    register struct planet *l;
+X    int pcount = 0;
+X    register int i;
+X    int tdist;
+X    int	k;
+X    double dx, dy;
+X
+X    /* Find an enemy */
+X    ebuf.e_info = p->p_ship->s_no;
+X    ebuf.e_dist = GWIDTH + 1;
+X    ebuf.e_flags = 0;
+X
+X    pcount = 0;  /* number of human players in game */
+X
+X    /* avoid dead slots, me */
+X    for (i = 0, j = &players[i]; i < MAXPLAYER; i++, j++) {
+X	if ((j->p_status != PALIVE) || (j == p))
+X	    continue;
+X	else
+X	    pcount++;	/* Other players in the game */
+X
+X	/* Can we see them? */
+X	if (iscloaked(j->p_ship) && !(p->p_flags & PFRVHARD))
+X		continue;
+X
+X	if (((j->p_ship->s_swar | j->p_ship->s_hostile) & (1 << p->p_ship->s_team))
+X		|| ((p->p_ship->s_swar | p->p_ship->s_hostile) & (1 << j->p_ship->s_team))) {
+X	    /* We have an enemy */
+X	    /* Get his range */
+X	    dx = j->p_ship->s_x - p->p_ship->s_x;
+X	    dy = j->p_ship->s_y - p->p_ship->s_y;
+X	    tdist = hypot(dx, dy);
+X
+X	    if (tdist < ebuf.e_dist) {
+X		ebuf.e_info = i;
+X		ebuf.e_dist = tdist;
+X	    }
+X	}
+X    }
+X    if (pcount == 0)
+X	return ((struct Enemy *) NO_PLAYERS);	/* no players in game */
+X
+X    if (ebuf.e_info == p->p_ship->s_no) {
+X	return (0);			/* no hostile players in the game */
+X    }
+X
+X
+X	j = &players[ebuf.e_info];
+X
+X	/* Get torpedo course to nearest enemy */
+X	ebuf.e_flags &= ~(E_TSHOT);
+X	for (i = 0; i < 50; i++) {
+X	    double  he_x, he_y, area;
+X
+X	    he_x = j->p_ship->s_x + ((icos[j->p_ship->s_dir] * j->p_ship->s_speed * WARP1) >> TRIGSCALE) * i;
+X	    he_y = j->p_ship->s_y + ((isin[j->p_ship->s_dir] * j->p_ship->s_speed * WARP1) >> TRIGSCALE) * i;
+X	    area = i * p->p_ship->s_torpspeed * WARP1;
+X	    if (hypot(he_x - p->p_ship->s_x, he_y - p->p_ship->s_y) < area) {
+X		ebuf.e_flags |= E_TSHOT;
+X		ebuf.e_tcourse = rgetcourse(p, (int) he_x, (int) he_y);
+X		break;
+X	    }
+X	}
+X	if (debug > 1)
+X	    fprintf(stderr, "torpedo course to enemy %d is %d (%d) - %s\n",
+X		    j->p_ship->s_no,
+X		    (int) ebuf.e_tcourse,
+X		    (int) ebuf.e_tcourse * 360 / 256,
+X		    (ebuf.e_flags & E_TSHOT) ? "aiming to hit" :
+X		    "no hit possible");
+X
+X	/* Get phaser shot status */
+X	if (ebuf.e_dist < p->p_ship->s_phasedist)
+X		ebuf.e_flags |= E_PSHOT;
+X	else
+X		ebuf.e_flags &= ~(E_PSHOT);
+X
+X	/* get course info */
+X	ebuf.e_course = rgetcourse(p, j->p_ship->s_x, j->p_ship->s_y);
+X	if (debug > 1)
+X	    fprintf(stderr, "Set course to enemy is %d (%d)\n",
+X		    (int) ebuf.e_course,
+X		    (int) ebuf.e_course * 360 / 256);
+X
+X	/* Determine if there is a team member we should protect. */
+X	for (i = 0, j = &players[0]; i < MAXPLAYER; i++, j++) {
+X		if ((j->p_status != PALIVE) || j->p_ship->s_team != p->p_ship->s_team || j == p)
+X			continue;
+X
+X		if (j->p_ship->s_flags & SFRED) {
+X			ebuf.e_flags |= E_TEAMRED;
+X			p->p_ship->s_flags &= ~SFPLANETPROT;
+X			p->p_ship->s_planetprot = 0;
+X			/* Get his range */
+X			dx = j->p_ship->s_x - p->p_ship->s_x;
+X			dy = j->p_ship->s_y - p->p_ship->s_y;
+X			tdist = hypot(dx, dy);
+X
+X			if (tdist < ebuf.e_dist) {
+X				ebuf.e_info = i;
+X				ebuf.e_dist = tdist;
+X				ebuf.e_pcourse = rgetcourse(p, j->p_ship->s_x, j->p_ship->s_y);
+X			}
+X		}
+X		if (ebuf.e_flags & E_TEAMRED)
+X			continue;
+X		if (j->p_ship->s_flags & SFYELLOW) {
+X			ebuf.e_flags |= E_TEAMYELLOW;
+X			p->p_ship->s_flags &= ~SFPLANETPROT;
+X			p->p_ship->s_planetprot = 0;
+X			/* Get his range */
+X			dx = j->p_ship->s_x - p->p_ship->s_x;
+X			dy = j->p_ship->s_y - p->p_ship->s_y;
+X			tdist = hypot(dx, dy);
+X
+X			if (tdist < ebuf.e_dist) {
+X				ebuf.e_info = i;
+X				ebuf.e_dist = tdist;
+X				ebuf.e_pcourse = rgetcourse(p, j->p_ship->s_x, j->p_ship->s_y);
+X			}
+X		}
+X	}
+X
+X	/* Determine if there is a planet that we should protect. */
+X	for (i = 0, l = &planets[0]; i < MAXPLANETS; i++, l++) {
+X		/* Our planet? */
+X		if (l->pl_owner != p->p_ship->s_team)
+X			continue;
+X		if (l->pl_flags & PLINVIS)
+X			continue;
+X		/* Ok, find planet that is being bombed. */
+X		/* This "simulates" a reponse to plea for help. */
+X		for (i = 0, j = &players[0]; i < MAXPLAYER; i++, j++) {
+X			if ((j->p_status != PALIVE))
+X				continue;
+X			if (j->p_ship->s_planet == l->pl_no &&
+X			    ((j->p_ship->s_flags & SFBOMB) ||
+X			    ((j->p_ship->s_flags & SFBEAMDOWN) && j->p_ship->s_team != l->pl_owner))) {
+X				ebuf.e_planetprot = l->pl_no;
+X				ebuf.e_flags |= E_PLANETPROT;
+X				/* NOTE: We should find closest planet*/
+X				/* relative to our current position. */
+X				goto searchdone;
+X			}
+X		}
+X	}
+X
+X	/* No planet to protect, but keep going if there WAS one that we */
+X	/* found earlier. */
+X	if (p->p_ship->s_flags & SFPLANETPROT) {
+X		ebuf.e_planetprot = p->p_ship->s_planetprot;
+X		ebuf.e_flags |= E_PLANETPROT;
+X	}
+X
+Xsearchdone:
+X	if ((ebuf.e_flags & (E_TSHOT|E_PSHOT)) == 0)
+X		ebuf.e_dist = GWIDTH;
+X
+X	return (&ebuf);
+X}
+X
+Xdo_repair(p)
+Xstruct player	*p;
+X{
+X/* Repair if necessary (we are safe) */
+X
+X    if (p->p_ship->s_damage > 0) {
+X	p->p_ship->s_desspeed = 0;
+X	cloak_off(p);
+X	shield_down(p);
+X	p->p_ship->s_desspeed = 0;
+X	if (p->p_ship->s_speed == 0)
+X	    repair(p);
+X	if (debug > 1)
+X	    fprintf(stderr, "%d) repairing damage at %d\n",
+X		p->p_ship->s_no,
+X		p->p_ship->s_damage);
+X	return(1);
+X    } else {
+X	return (0);
+X    }
+X}
+END_OF_rmove.c
+if test 19425 -ne `wc -c <rmove.c`; then
+    echo shar: \"rmove.c\" unpacked with wrong size!
+fi
+# end of overwriting check
+fi
+echo shar: End of archive 6 \(of 11\).
+cp /dev/null ark6isdone
+MISSING=""
+for I in 1 2 3 4 5 6 7 8 9 10 11 ; do
+    if test ! -f ark${I}isdone ; then
+	MISSING="${MISSING} ${I}"
+    fi
+done
+if test "${MISSING}" = "" ; then
+    echo You have unpacked all 11 archives.
+    rm -f ark[1-9]isdone ark[1-9][0-9]isdone
+else
+    echo You still need to unpack the following archives:
+    echo "        " ${MISSING}
+fi
+##  End of shell archive.
+exit 0
